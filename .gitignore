@@ -1,0 +1,6 @@
+env/
+stockfish/
+
+.idea/
+*.png
+*.csv
