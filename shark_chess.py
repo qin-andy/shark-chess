@@ -11,22 +11,14 @@ Original file is located at
 ## Imports and Packages
 """
 
-pip install chess
-
 import random
 import time
 import typing
 import math
 
 import matplotlib.pyplot as plt
-from matplotlib.colors import BoundaryNorm
-from matplotlib.ticker import MaxNLocator
+
 import numpy as np
-
-
-from google.colab import files
-
-import urllib3 as urllib # for reading in FENs
 import pandas as pd
 
 import chess
@@ -34,102 +26,50 @@ import chess.svg
 import chess.engine
 import chess.pgn
 
-"""Install Stockfish"""
-
-!   wget https://stockfishchess.org/files/stockfish_14_linux_x64_popcnt.zip && \
-    unzip stockfish_14_linux_x64_popcnt.zip stockfish_14_linux_x64_popcnt/stockfish_14_x64_popcnt
 
 """## Testing Chess Package
 
 Stockfish vs Random Moves
 """
 
-engine = chess.engine.SimpleEngine.popen_uci("/content/stockfish_14_linux_x64_popcnt/stockfish_14_x64_popcnt")
-
-board = chess.Board()
-game = chess.pgn.Game()
-node = game
-
-MAX_MOVES = 500
-turns = 0
-while not board.is_game_over() and turns <= MAX_MOVES:
-  move = None
-  if board.turn: # white move
-    result = engine.play(board, chess.engine.Limit(0.1))
-    move = result.move
-    # print(str(move))
-  else: # black move
-    moves = board.generate_legal_moves()
-    moves_arr = [move for move in moves]
-    move = random.choice(moves_arr)
-    print(str(move))
-  node = node.add_variation(move)
-  board.push(move)
-  # print(board.fen())
-  turns +=1
-game.end() # ??? This throws an assertion error? but putting  aprint statement after fixes it??? ???
-print("Game Over")
-
-"""Playing Around with Random Moves"""
-
-engine = chess.engine.SimpleEngine.popen_uci("/content/stockfish_14_linux_x64_popcnt/stockfish_14_x64_popcnt")
-
-board = chess.Board(chess960 = True)
-game = chess.pgn.Game()
-node = game
-
-MAX_MOVES = 500
-turns = 0
-water_threshold = 0.1
-
-while not board.is_game_over() and turns <= MAX_MOVES:
-  move = None
-  if random.random() >= water_threshold:
-    result = engine.play(board, chess.engine.Limit(0.1))
-    move = result.move
-    # print("rm: " + str(move))
-  else:
-    moves = board.generate_legal_moves()
-    moves_arr = [move for move in moves]
-    move = random.choice(moves_arr)
-    # print("nm: " + str(move))
-
-  node = node.add_variation(move)
-  board.push(move)
-  turns +=1
-game.end() # ??? This throws an assertion error? but putting  aprint statement after fixes it??? ???
-print("Game Over")
+stockfish_path = '.\stockfish\stockfish_15.1_win_x64_popcnt\stockfish_15.1_win_x64_popcnt\stockfish-windows-2022-x86-64-modern.exe'
 
 """## Interchangeable Bot Setup
 Bot game player engine, pits two ChessBots against eachogther by repeatedly having them generate moves
 
 """
 
+
 # Base chess bot
-class ChessBot():
+class ChessBot:
   def __init__(self):
     # for storing "move reasoning" for inspection
     self.logs = []
     self.reasoning = ""
+
   def make_move(self, board: chess.Board) -> typing.Tuple[chess.Move, str]:
     pass
+
   def get_reasoning(self):
     return self.reasoning
+
   def __str__(self):
     return "Base"
 
-# Result to store results from a game plaed  
-class GameResult():
+
+# Result to store results from a game plaed
+class GameResult:
   def __init__(self):
-    self.white_player: String = None
-    self.black_player: String = None
-    self.winner: String = None
-    self.moves: int = None
-    self.time: float = None
-    self.pgn: String = None
-    self.end_reason: String = None
+    self.white_player = None
+    self.black_player = None
+    self.winner = None
+    self.moves = None
+    self.time = None
+    self.pgn = None
+    self.end_reason = None
     self.pc_game = None
     self.pc_board = None
+
   def __str__(self):
     result = ""
     result += "[" + self.white_player + "]" + " vs " + "[" + self.black_player + "]"
@@ -154,10 +94,10 @@ def create_game_result(wb: ChessBot, bb: ChessBot,
   gr.pc_board = board
   gr.pc_game = game
 
-  # Outcome 
+  # Outcome
   outcome = board.outcome()
   # No board outcome means turn limit was hit
-  if outcome == None: 
+  if outcome == None:
     gr.winner = 'Draw'
     gr.end_reason = 'Turn Limit'
   else:
@@ -173,6 +113,7 @@ def create_game_result(wb: ChessBot, bb: ChessBot,
         gr.winner = str(bb)
   return gr
 
+
 # Helper that creates a random legal move
 def move_rand(board: chess.Board) -> chess.Move:
   moves = board.generate_legal_moves()
@@ -180,12 +121,15 @@ def move_rand(board: chess.Board) -> chess.Move:
   rand_move = random.choice(moves_arr)
   return rand_move
 
+
 # Always random move bot
 class AlwaysRandomBot(ChessBot):
   def make_move(self, board):
     return move_rand(board), 'random'
+
   def __str__(self):
     return "AlwaysRandom"
+
 
 # Full Stockfish Bot
 # Limit - thinking time in seconds
@@ -194,12 +138,15 @@ class Stockfish100Bot(ChessBot):
     super().__init__()
     self.engine = engine
     self.limit = limit
+
   def make_move(self, board):
     comment = 'Stockfish' + str(self.limit.time)
     result = self.engine.play(board, self.limit)
     return result.move, comment
+
   def __str__(self):
     return "SF:" + str(self.limit)
+
 
 # Water Bot
 # Waters down any two bots by giving a random ratio of moves from one to the other
@@ -210,6 +157,7 @@ class WaterBot(ChessBot):
     self.b2 = b2
     self.water_ratio = water_ratio
     self.custom_name = None
+
   def make_move(self, board):
     move = chess.Move
     if random.random() <= self.water_ratio:
@@ -223,7 +171,8 @@ class WaterBot(ChessBot):
     if self.custom_name == None:
       return 'W:[' + str(self.b1) + str(self.b2) + ']R:' + str(self.water_ratio)
     return self.custom_name
-  
+
+
 # Always does moves which check. Then captures, then random after.
 class BerserkBot(ChessBot):
   def make_move(self, board):
@@ -236,6 +185,7 @@ class BerserkBot(ChessBot):
       return random.choice(captures_arr), 'Capture Spotted'
     else:
       return random.choice(moves_arr), 'Nothing Spotted'
+
   def __str__(self):
     return "Berserk"
 
@@ -246,16 +196,18 @@ class PacifistBot(ChessBot):
     checks_arr = [move for move in board.generate_legal_moves() if board.gives_check(move)]
     captures_arr = [move for move in board.generate_legal_moves() if board.is_capture(move)]
     moves_arr = [move for move in board.generate_legal_moves()]
-    safe_moves_arr = [move for move in moves_arr if 
+    safe_moves_arr = [move for move in moves_arr if
                       (not board.gives_check(move)) and (not board.is_capture(move))]
     if safe_moves_arr:
       return random.choice(safe_moves_arr), 'Safe move spotted'
     else:
       return random.choice(moves_arr), 'I must resort to violence'
+
   def __str__(self):
     return "Pacifist"
 
-# Prioitizes moving king (randomly) 
+
+# Prioitizes moving king (randomly)
 class DanceKingBot(ChessBot):
   def make_move(self, board):
     moves_arr = [move for move in board.generate_legal_moves()]
@@ -264,8 +216,10 @@ class DanceKingBot(ChessBot):
       return random.choice(king_moves), 'King going in!'
     else:
       return random.choice(moves_arr), 'Im trapped!'
+
   def __str__(self):
     return "DanceKing"
+
 
 # Prioitizes moving king towards enemy king
 class SuicideKingBot(ChessBot):
@@ -273,9 +227,9 @@ class SuicideKingBot(ChessBot):
     moves_arr = [move for move in board.generate_legal_moves()]
     king_moves = [move for move in moves_arr if move.from_square == board.king(board.turn)]
 
-    target_square = board.king(not board.turn) # Find opponent turn
-    
-    king_moves.sort(key = lambda x: chess.square_distance(x.to_square, target_square))
+    target_square = board.king(not board.turn)  # Find opponent turn
+
+    king_moves.sort(key=lambda x: chess.square_distance(x.to_square, target_square))
     if king_moves:
       curr_dist = chess.square_distance(board.king(board.turn), target_square)
       # If the closest king move would move it farther from the enemy king, pass
@@ -284,8 +238,10 @@ class SuicideKingBot(ChessBot):
       return king_moves[0], 'King closing distance!'
     else:
       return random.choice(moves_arr), 'No king moves!!'
+
   def __str__(self):
     return "SuicideKing"
+
 
 # Plays with Stockfish strength except when in check, then moves randomly
 class PanicFishBot(ChessBot):
@@ -293,6 +249,7 @@ class PanicFishBot(ChessBot):
     super().__init__()
     self.engine = engine
     self.limit = limit
+
   def make_move(self, board):
     if board.is_check():
       return move_rand(board), "Panic!!!"
@@ -300,8 +257,10 @@ class PanicFishBot(ChessBot):
       comment = 'Calm' + str(self.limit.time)
       result = self.engine.play(board, self.limit)
       return result.move, comment
+
   def __str__(self):
     return "PanicFish"
+
 
 # After capturing, gets excited and begins lurking, before entering a frenzy
 class SharkFishBot(ChessBot):
@@ -335,16 +294,41 @@ class SharkFishBot(ChessBot):
     if board.gives_check(move) or board.is_capture(move):
       self.excitement_time = self.lurk_time + self.frenzy_time
       comment = '...smelling blood... --- ' + comment
-    return move, comment  
+    return move, comment
 
   def __str__(self):
     if self.custom_name == None:
       return 'Shark[' + str(self.shallow_bot) + ']R:' + str(self.limit)
     return self.custom_name
 
+
+# Play a single game between bots
+def play_game(wb: ChessBot, bb: ChessBot, turn_limit: int):
+  board = chess.Board()
+  game = chess.pgn.Game()
+  node = game
+  turns = 0
+
+  start_time = time.time()
+  while not board.is_game_over() and turns <= turn_limit:
+    move = None
+    if board.turn:
+      move, comment = wb.make_move(board)
+    else:
+      move, comment = bb.make_move(board)
+    node = node.add_variation(move)
+    node.comment = comment
+    board.push(move)
+    turns += 1
+  game.end()
+  game_result = create_game_result(wb, bb, board, game)
+  game_result.time = time.time() - start_time
+  return game_result
+
+
 """## Concrete Bot Setup"""
 
-engine = chess.engine.SimpleEngine.popen_uci("/content/stockfish_14_linux_x64_popcnt/stockfish_14_x64_popcnt")
+engine = chess.engine.SimpleEngine.popen_uci(stockfish_path)
 
 base_limit = chess.engine.Limit(time=0.1, depth=10)
 
@@ -371,7 +355,7 @@ game_result = play_game(bot_pacifist, bot_suicide_king, 500)
 print(game_result.pc_board.outcome())
 
 board_svg = chess.svg.board(game_result.pc_board)
-display(game_result.pc_board)
+# display(game_result.pc_board)
 print(game_result.pc_game)
 
 """## Water Bot Generation
@@ -381,15 +365,17 @@ print(game_result.pc_game)
 # creates list of bots
 bots = []
 
+
 def generate_water_bots(b1, b2, name=None):
   mixes = [0.1, 0.2, 0.8, 0.9]
   water_bots = []
   for mix in mixes:
     water_bot = WaterBot(b1, b2, mix)
     if not name == None:
-      water_bot.custom_name = name + str(int(mix*100))
+      water_bot.custom_name = name + str(int(mix * 100))
     water_bots.append(water_bot)
   return water_bots
+
 
 # bots += generate_water_bots(bot_sf, bot_ar, "Waterfish")
 # bots += generate_water_bots(bot_sf, bot_berserk, "Torrent")
@@ -402,9 +388,11 @@ for bot in bots:
 ## Elo Calcuations
 """
 
+
 def win_prob(rating1, rating2):
   return 1.0 * 1.0 / (1 + 1.0 * math.pow(10, 1.0 * (rating2 - rating1) / 400))
   # Geeks for geeks was wrong..... their version has a typo int he above alg
+
 
 # Takes 1 ELO,s a K value, and d = winner == 1
 def calculate_elos(rating1, rating2, K, d):
@@ -425,49 +413,27 @@ def calculate_elos(rating1, rating2, K, d):
   else:
     rating1 += K * (0.5 - prob1)
     rating2 += K * (0.5 - prob2)
-  
+
   return int(rating1), int(rating2)
 
 
 print(calculate_elos(1200, 1000, 32, 0.5))
 # Populate names and ELOs
-elo_k = 32 # Determines how much Elo goes up and down
+elo_k = 32  # Determines how much Elo goes up and down
 
 """## Multigame Match Setup"""
 
+
 # Actually play the games
-
-# Play a single game between bots
-def play_game(wb: ChessBot, bb: ChessBot, turn_limit: int):
-  board = chess.Board()
-  game = chess.pgn.Game()
-  node = game
-  turns = 0
-
-  start_time = time.time()
-  while not board.is_game_over() and turns <= turn_limit:
-    move = None
-    if board.turn:
-      move, comment = wb.make_move(board)
-    else:
-      move, comment = bb.make_move(board)
-    node = node.add_variation(move)
-    node.comment = comment
-    board.push(move)
-    turns +=1
-  game.end()
-  game_result = create_game_result(wb, bb, board, game)
-  game_result.time = time.time() - start_time
-  return game_result
 
 # Helper to play multiple games between two bots
 def multiplay(wb, bb, count, elos=None):
-  grs = [] # game results array
+  grs = []  # game results array
   for i in range(count):
-    print('Game [' + str(i+1) + '/' + str(count) + "] of [" + str(wb) + "] vs [" + str(bb) + "]")
+    print('Game [' + str(i + 1) + '/' + str(count) + "] of [" + str(wb) + "] vs [" + str(bb) + "]")
     gr = play_game(wb, bb, 300)
     print(gr.winner + ' wins in [' + str(gr.moves) + '] turns in [' + str(gr.time) + '] seconds')
-    if elos: # Update Elos case
+    if elos:  # Update Elos case
       if str(wb) == str(bb):
         pass
       else:
@@ -481,22 +447,25 @@ def multiplay(wb, bb, count, elos=None):
     grs.append(gr)
   return grs
 
+
 """## Run Single Bot Match"""
 
+
 def play_match(b1, b2, games_count, swap_colors=True, elos=None):
-  print('=========<' + str(b1) +' [vs] ' + str(b2) + '>=========')
+  print('=========<' + str(b1) + ' [vs] ' + str(b2) + '>=========')
   # Time and play games
   start_time = time.time()
   grs = []
-  
+
   grs += multiplay(b1, b2, games_count, elos)
   if swap_colors:
-    grs += multiplay(b2, b1, games_count, elos) # switch colors
+    grs += multiplay(b2, b1, games_count, elos)  # switch colors
   end_time = time.time()
   print('Total Time: ' + str((end_time - start_time)))
   print()
 
   return grs
+
 
 """## Run Bot Tournament
 
@@ -515,14 +484,13 @@ shark_lurk.custom_name = "LurkShark"
 torrent_80 = WaterBot(bot_sf, bot_berserk, 0.8)
 torrent_80.custom_name = 'Torrent80'
 
-bots_x = [bot_dance_king, bot_suicide_king, bot_ar, bot_pacifist, bot_berserk, 
-          shark_angry, shark_lurk, 
-          torrent_80, water_fish_80, bot_sf,
-          bot_panic]
+# bots_x = [bot_dance_king, bot_suicide_king, bot_ar, bot_pacifist, bot_berserk,
+#           shark_angry, shark_lurk,
+#           torrent_80, water_fish_80, bot_sf,
+#           bot_panic]
 
-
+bots_x = [bot_dance_king, bot_suicide_king]
 # Setting up required resources
-game_results = []
 player_names = []
 elos = {}
 for bot in bots_x:
@@ -533,7 +501,7 @@ print(player_names)
 
 def play_tournament(bots, match_length, swap_colors):
   start_time = time.time()
-  match_total = len(bots)**2
+  match_total = len(bots) ** 2
   match_count = 0
   grs = []
   for b1 in bots:
@@ -546,8 +514,11 @@ def play_tournament(bots, match_length, swap_colors):
   print('Total time for tournament: ' + str(total_time))
   return grs
 
+
+engine.close()
+
 ### PLAY THE TOURNAMENT!
-game_results = play_tournament(bots_x, 20, False)
+game_results = play_tournament(bots_x, 1, False)
 
 # Bot Names for Labelling
 
@@ -578,20 +549,19 @@ for gr in game_results:
 
 # Settingup data in dict
 game_data = {
-    'Winner': winners, 
-    'End Reason': reasons,
-    'Moves': moves,
-    'Time': times,
-    'PGN': pgns,
-    'White': whites,
-    'Black': blacks
+  'Winner': winners,
+  'End Reason': reasons,
+  'Moves': moves,
+  'Time': times,
+  'PGN': pgns,
+  'White': whites,
+  'Black': blacks
 }
 
 # Into Pandas :3
 df = pd.DataFrame(game_data)
-df.to_csv('output.csv', encoding = 'utf-8-sig') 
-files.download('output.csv')
-df
+df.to_csv('output.csv', encoding='utf-8-sig')
+# files.download('output.csv')
 
 # Summary Analysis of DF
 df.groupby("Winner").count()
@@ -602,13 +572,14 @@ df['Winner'].value_counts(normalize=True)
 
 print(elos)
 kvs = list(elos.items())
-kvs.sort(key= lambda x: x[1])
+kvs.sort(key=lambda x: x[1])
 print(kvs)
 names_by_elo, elo_values = zip(*kvs)
 
 plt.bar(range(len(elos)), elo_values, tick_label=names_by_elo)
 plt.xticks(rotation=90)
-plt.show()
+# plt.show()
+plt.savefig('elos.png')  # TODO : fix sizing
 
 """## Matchup Chart Creation"""
 
@@ -623,44 +594,45 @@ for white_player in player_names:
   for black_player in player_names:
     # Collect all matches from database with white player and black player
     # Consolidate them into stalement and win/loss/staledraw (store as tuple first?)
-      # In future, cinlude more info, like average move length
+    # In future, cinlude more info, like average move length
     white_wins = 0.0
     white_drawmates = 0.0
     white_losses = 0.0
-    for index, item in df.loc[(df['White'] == white_player) & (df['Black'] == black_player)]['Winner'].value_counts(normalize=True).items():
+    for index, item in df.loc[(df['White'] == white_player) & (df['Black'] == black_player)]['Winner'].value_counts(
+            normalize=True).items():
       # Value will be one of white_player, black_player, draw, or Stalement (Stalemate)
       if index == white_player:
         white_wins = round(item, round_to_decimals)
       elif (index == 'Stalemate') or (index == 'Draw'):
         white_drawmates += round(item, round_to_decimals)
     white_losses = round(1 - (white_wins + white_drawmates), round_to_decimals)
-    
+
     # Append to dict
     matchups_dict[white_player][black_player] = (white_wins, white_drawmates, white_losses)
     # matchups_dict[white_player][black_player] = white_wins
 matchups_df = pd.DataFrame(matchups_dict)
-matchups_df
-
-"""https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.xticks.html"""
 
 ticks = player_names
 
-
 matchups_rgb = np.array(matchups_df.values.tolist()).astype('float')
+
+
 def scale_rgb(i):
   new = (i * 0.5) + 0.25
   return i
-   
+
+
 applyall = np.vectorize(scale_rgb)
 matchups_rgb = applyall(matchups_rgb)
 
-plt.figure(figsize = (7,7))
+plt.figure(figsize=(7, 7))
 plt.xlabel("White Player")
 plt.ylabel("Black Player")
 plt.xticks(range(len(player_names)), player_names, rotation=90)
 plt.yticks(range(len(player_names)), player_names)
 plt.imshow(matchups_rgb)
-plt.show()
+# plt.show()
+plt.savefig('matchups.png')  # TODO : fix sizing
 
 """## Time Chart"""
 
@@ -672,37 +644,30 @@ for white_player in player_names:
   for black_player in player_names:
     # Collect all matches from database with white player and black player
     # Consolidate them into stalement and win/loss/staledraw (store as tuple first?)
-      # In future, cinlude more info, like average move length
+    # In future, cinlude more info, like average move length
     total_time = df.loc[(df['White'] == white_player) & (df['Black'] == black_player)]['Time'].sum()
 
     # Append to dict
     matchup_times_dict[white_player][black_player] = total_time
     # matchups_dict[white_player][black_player] = white_wins
 matchup_times_df = pd.DataFrame(matchup_times_dict)
-matchup_times_df
 
 times_sum = matchup_times_df.sum()
-plt.figure(figsize = (12,4))
+plt.figure(figsize=(12, 4))
 plt.xlabel("Player")
 plt.ylabel("Time in Seconds")
 plt.bar(player_names, times_sum)
 plt.xticks(rotation=90)
-plt.show()
-
-"""https://www.w3schools.com/python/matplotlib_pie_charts.asp"""
+# plt.show()
+plt.savefig('matchup_times.png')  # TODO : fix sizing
 
 plt.pie(times_sum, labels=player_names)
-plt.show()
-
-# make plot
-fig, ax = plt.subplots()
-shw = ax.imshow(matchup_times_df)
-bar = plt.colorbar(shw)
+plt.savefig('times_pie_chart.png')
 
 """## Misc Searches"""
 
 # Selecting rows based on column values, notice use of & instead of and for boolean
-df.loc[(df['White'] == 'AlwaysRandom') & (df['Black'] == 'RandShark')] 
+df.loc[(df['White'] == 'AlwaysRandom') & (df['Black'] == 'RandShark')]
 
 # Iterating through example
 for index, row in df.loc[(df['White'] == 'AlwaysRandom') & (df['Black'] == 'RandShark')].iterrows():
@@ -710,56 +675,56 @@ for index, row in df.loc[(df['White'] == 'AlwaysRandom') & (df['Black'] == 'Rand
 
 # Get Win proportions for a single match
 df.loc[(df['White'] == 'AlwaysRandom') & (df['Black'] == 'RandShark')]['Winner'].value_counts(normalize=True)
-for index, item in df.loc[(df['White'] == 'AlwaysRandom') & (df['Black'] == 'RandShark')]['Winner'].value_counts(normalize=True).items():
+for index, item in df.loc[(df['White'] == 'AlwaysRandom') & (df['Black'] == 'RandShark')]['Winner'].value_counts(
+        normalize=True).items():
   print(index, item)
 # Idea: for every both, calculate its win percent against the other bot as the color
 
 df.loc[(df['Winner'] == 'DanceKing')]
 
-"""# Playing with Stockfish Depths
+# TODO : figure out what to do with this section. refactor?
+# """# Playing with Stockfish Depths
+#
+# ## Testing multiple thinking times with default depth
+# """
+# eg_sf = Stockfish100Bot(engine, base_limit)
+#
+# def generate_limits(time_depth_arr):
+#   lims = []
+#   for time_depth in time_depth_arr:
+#     time, depth = time_depth
+#     lim = chess.engine.Limit
+#     if depth == -1:
+#       lim = chess.engine.Limit(time)
+#     else:
+#       lim = chess.engine.Limit(time, depth)
+#     lims.append(lim)
+#   return lims
+#
+# def generate_sf_bots(lims):
+#   bots = []
+#   for lim in lims:
+#     sf = Stockfish100Bot(engine, lim)
+#     bots.append(sf)
+#   return bots
 
-## Testing multiple thinking times with default depth
-"""
-
-engine = chess.engine.SimpleEngine.popen_uci("/content/stockfish_14_linux_x64_popcnt/stockfish_14_x64_popcnt")
-eg_sf = Stockfish100Bot(engine, base_limit)
-
-def generate_limits(time_depth_arr):
-  lims = []
-  for time_depth in time_depth_arr:
-    time, depth = time_depth
-    lim = chess.engine.Limit
-    if depth == -1:
-      lim = chess.engine.Limit(time)
-    else:
-      lim = chess.engine.Limit(time, depth)
-    lims.append(lim)
-  return lims
-  
-def generate_sf_bots(lims):
-  bots = []
-  for lim in lims:
-    sf = Stockfish100Bot(engine, lim)
-    bots.append(sf)
-  return bots
-
-time_depths = [
-    (0.1, 2),
-    (0.1, 4),
-    (0.1, 6),
-    (0.1, 8),
-    (0.1, 10),
-    (0.1, 15),
-    (0.1, 20),
-    (0.1, -1)
-]
-      
-lims = generate_limits(time_depths)
-sf_bots = generate_sf_bots(lims)
-
-game_results = play_tournament(sf_bots, 5, False)
-
-player_names = []
-for bot in sf_bots:
-  player_names.append(str(bot))
-print(player_names)
+# time_depths = [
+#     (0.1, 2),
+#     (0.1, 4),
+#     (0.1, 6),
+#     (0.1, 8),
+#     (0.1, 10),
+#     (0.1, 15),
+#     (0.1, 20),
+#     (0.1, -1)
+# ]
+#
+# lims = generate_limits(time_depths)
+# sf_bots = generate_sf_bots(lims)
+#
+# game_results = play_tournament(sf_bots, 5, False)
+#
+# player_names = []
+# for bot in sf_bots:
+#   player_names.append(str(bot))
+# print(player_names)
