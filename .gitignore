@@ -4,3 +4,5 @@ stockfish/
 .idea/
 *.png
 *.csv
+
+__pycache__/
