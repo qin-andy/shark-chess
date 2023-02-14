@@ -134,7 +134,6 @@ class SuicideKingBot(ChessBot):
   def make_move(self, board):
     moves_arr = [move for move in board.generate_legal_moves()]
     king_moves = [move for move in moves_arr if move.from_square == board.king(board.turn)]
-
     target_square = board.king(not board.turn)  # Find opponent turn
 
     king_moves.sort(key=lambda x: chess.square_distance(x.to_square, target_square))

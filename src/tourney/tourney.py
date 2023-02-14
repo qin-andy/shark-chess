@@ -1,190 +1,199 @@
-# Result to store results from a game plaed
-import math
 import time
 
 import chess
 import chess.pgn
+import pandas as pd
 
-from src.bots.bots import ChessBot, WaterBot
+from src.bots.bots import ChessBot
+from src.tourney.elo import calculate_elos
+
+
+class Player:
+  def __init__(self, bot: ChessBot, friendly_name):
+    self.friendly_name = friendly_name
+    self.bot = bot
+    self.elo = 800  # default Elo
+
+  def move(self, board):
+    return self.bot.make_move(board)
+
+  def __str__(self):
+    return self.friendly_name
 
 
 class GameResult:
   def __init__(self):
-    self.white_player = None
-    self.black_player = None
-    self.winner = None
-    self.moves = None
-    self.time = None
-    self.pgn = None
-    self.end_reason = None
+    self.white_player: str = None
+    self.black_player: str = None
+    self.winner: str = None
+    self.r: float = None  # numerical value representing result. 1=w, 0.5=d, 0=b
+    self.moves: int = None
+    self.time: float = None
+    self.pgn: str = None
+    self.end_reason: str = None
     self.pc_game = None
     self.pc_board = None
 
+  def update(self, wp: Player, bp: Player,
+             board: chess.Board, game: chess.pgn.Game):
+    # Basic Naming
+    self.white_player = str(wp)
+    self.black_player = str(bp)
+    self.moves = board.fullmove_number
+
+    game.headers['Event'] = "Bot Match"
+    game.headers['White'] = str(wp)
+    game.headers['Black'] = str(bp)
+
+    self.pgn = str(game)
+
+    # For testing, remove later-
+    self.pc_board = board
+    self.pc_game = game
+
+    # Outcome logic
+    outcome = board.outcome()
+    # No board outcome means turn limit was hit
+    if outcome is None:
+      self.winner = 'Draw'
+      self.end_reason = 'Turn Limit'
+    else:
+      self.end_reason = outcome.termination.name
+      if outcome.winner is None:
+        # No winner means stalemate
+        self.winner = 'Stalemate'
+        self.r = 0.5
+      else:
+        # Winner is either black or white bot
+        if outcome.winner:
+          self.winner = str(wp)
+          self.r = 1
+        else:
+          self.winner = str(bp)
+          self.r = 0
+    return self
+
   def __str__(self):
     result = ""
-    result += "[" + self.white_player + "]" + " vs " + "[" + self.black_player + "]"
+    result += self.white_player + " vs " + self.black_player
     return result
 
 
-def create_game_result(wb: ChessBot, bb: ChessBot,
-                       board: chess.Board, game: chess.pgn.Game):
-  # Basic Naming
-  gr = GameResult()
-  gr.white_player = str(wb)
-  gr.black_player = str(bb)
-  gr.moves = board.fullmove_number
+class TourneyManager:
+  def __init__(self, players: list[Player], match_length: int):
+    self.concluded = False
+    self.players = players
+    self.match_length = match_length
+    self.game_results: list[GameResult] = []
 
-  game.headers['Event'] = "Bot Match"
-  game.headers['White'] = str(wb)
-  game.headers['Black'] = str(bb)
+  # Play a single game between players
+  def play_game(self, wp: Player, bp: Player, turn_limit: int):
+    board = chess.Board()
+    game = chess.pgn.Game()
+    node = game
+    turns = 0
 
-  gr.pgn = str(game)
-
-  # For testing, remove later-
-  gr.pc_board = board
-  gr.pc_game = game
-
-  # Outcome
-  outcome = board.outcome()
-  # No board outcome means turn limit was hit
-  if outcome == None:
-    gr.winner = 'Draw'
-    gr.end_reason = 'Turn Limit'
-  else:
-    gr.end_reason = outcome.termination.name
-    if outcome.winner == None:
-      # No winner means stalement
-      gr.winner = 'Stalemate'
-    else:
-      # Winner is either black or white bot
-      if outcome.winner:
-        gr.winner = str(wb)
+    start_time = time.time()
+    while not board.is_game_over() and turns <= turn_limit:
+      move = None
+      if board.turn:
+        move, comment = wp.move(board)
       else:
-        gr.winner = str(bb)
-  return gr
+        move, comment = bp.move(board)
+      node = node.add_variation(move)
+      node.comment = comment
+      board.push(move)
+      turns += 1
+    game.end()
+    game_result = GameResult()
+    game_result.update(wp, bp, board, game)
+    game_result.time = time.time() - start_time
+    return game_result
 
+  # Actually play the games
+  def update_elos(self, wp: Player, bp: Player, d, elo_k=32):
+    if str(wp) == str(bp):
+      return
 
-# Play a single game between bots
-def play_game(wb: ChessBot, bb: ChessBot, turn_limit: int):
-  board = chess.Board()
-  game = chess.pgn.Game()
-  node = game
-  turns = 0
+    wp.elo, bp.elo = calculate_elos(wp.elo, bp.elo, elo_k, d)
+    print(str(wp) + ': ' + str(wp.elo) + ', ' + str(bp) + ': ' + str(bp.elo))
 
-  start_time = time.time()
-  while not board.is_game_over() and turns <= turn_limit:
-    move = None
-    if board.turn:
-      move, comment = wb.make_move(board)
-    else:
-      move, comment = bb.make_move(board)
-    node = node.add_variation(move)
-    node.comment = comment
-    board.push(move)
-    turns += 1
-  game.end()
-  game_result = create_game_result(wb, bb, board, game)
-  game_result.time = time.time() - start_time
-  return game_result
+  # Helper to play multiple games between two bots
+  def play_match(self, p1: Player, p2: Player, count, swap_colors=False):
+    print('=========<' + str(p1) + ' [vs] ' + str(p2) + '>=========')
 
+    # Time and play games
+    start_time = time.time()
+    elo_k = 32  # elo_k = 32, TODO: read from options
+    grs = []  # game results array
 
-def generate_water_bots(b1, b2, name=None):
-  mixes = [0.1, 0.2, 0.8, 0.9]
-  water_bots = []
-  for mix in mixes:
-    water_bot = WaterBot(b1, b2, mix)
-    if not name == None:
-      water_bot.custom_name = name + str(int(mix * 100))
-    water_bots.append(water_bot)
-  return water_bots
+    for i in range(count):
+      print('Game [' + str(i + 1) + '/' + str(count) + "] of [" + str(p1) + "] vs [" + str(p2) + "]")
+      gr = self.play_game(p1, p2, 300)
+      print(gr.winner + ' wins in [' + str(gr.moves) + '] turns in [' + str(gr.time) + '] seconds')
+      self.update_elos(p1, p2, gr.r, elo_k)
+      grs.append(gr)
 
+    if swap_colors:  # TODO: Recursive case, could be cleaner
+      grs2 = self.play_match(p2, p1, count, False)
+      grs += grs2
 
-def win_prob(rating1, rating2):
-  return 1.0 * 1.0 / (1 + 1.0 * math.pow(10, 1.0 * (rating2 - rating1) / 400))
-  # Geeks for geeks was wrong..... their version has a typo int he above alg
+    print('Total Time: ' + str(time.time() - start_time))
+    print()
 
+    return grs
 
-# Takes 1 ELO,s a K value, and d = winner == 1
-def calculate_elos(rating1, rating2, K, d):
-  prob1 = win_prob(rating1, rating2)
-  prob2 = win_prob(rating2, rating1)
-  # print(prob1, prob2)
-  # Case -1 When Player A wins
-  if (d == 1):
-    rating1 += K * (1 - prob1)
-    rating2 += K * (0 - prob2)
+  # Play round robin tourney
+  def play_tournament(self):
+    players = self.players
+    match_length = self.match_length
 
-  # Case -2 When Player B wins
-  elif (d == 0):
-    rating1 += K * (0 - prob1)
-    rating2 += K * (1 - prob2)
+    start_time = time.time()
+    match_total = len(players) ** 2
+    match_count = 0
+    grs = []
+    for p1 in players:
+      for p2 in players:
+        match_count += 1
+        # Play a single one-sided match (no color swapping)
+        print('Match ' + str(match_count) + '/' + str(match_total))
+        grs += self.play_match(p1, p2, match_length, False)
+    total_time = time.time() - start_time
+    print('Total time for tournament: ' + str(total_time))
+    return grs
 
-  # Tie case
-  else:
-    rating1 += K * (0.5 - prob1)
-    rating2 += K * (0.5 - prob2)
+  def to_csv(self) -> str:
+    if not self.concluded:
+      return ""
+    winners = []
+    reasons = []
+    moves = []
+    times = []
+    pgns = []
+    whites = []
+    blacks = []
 
-  return int(rating1), int(rating2)
+    # Unzip array of game objects into arrays
+    for gr in self.game_results:
+      winners.append(gr.winner)
+      reasons.append(gr.end_reason)
+      moves.append(gr.moves)
+      times.append(gr.time)
+      pgns.append(gr.pgn)
+      whites.append(gr.white_player)
+      blacks.append(gr.black_player)
 
+    # Settingup data in dict
+    game_data = {
+      'Winner': winners,
+      'End Reason': reasons,
+      'Moves': moves,
+      'Time': times,
+      'PGN': pgns,
+      'White': whites,
+      'Black': blacks
+    }
+    df = pd.DataFrame(game_data)
+    df.to_csv('output.csv', encoding='utf-8-sig')
+    # files.download('output.csv')
 
-elo_k = 32  # Determines how much Elo goes up and down
-
-
-# Actually play the games
-
-# Helper to play multiple games between two bots
-def multiplay(wb, bb, count, elos=None):
-  grs = []  # game results array
-  for i in range(count):
-    print('Game [' + str(i + 1) + '/' + str(count) + "] of [" + str(wb) + "] vs [" + str(bb) + "]")
-    gr = play_game(wb, bb, 300)
-    print(gr.winner + ' wins in [' + str(gr.moves) + '] turns in [' + str(gr.time) + '] seconds')
-    if elos:  # Update Elos case
-      if str(wb) == str(bb):
-        pass
-      else:
-        winner = 0.5
-        if (gr.winner == str(wb)):
-          winner = 1
-        elif (gr.winner == str(bb)):
-          winner = 0
-        elos[str(wb)], elos[str(bb)] = calculate_elos(elos[str(wb)], elos[str(bb)], elo_k, winner)
-        print(str(wb) + ': ' + str(elos[str(wb)]) + ', ' + str(bb) + ': ' + str(elos[str(bb)]))
-    grs.append(gr)
-  return grs
-
-
-"""## Run Single Bot Match"""
-
-
-def play_match(b1, b2, games_count, swap_colors=True, elos=None):
-  print('=========<' + str(b1) + ' [vs] ' + str(b2) + '>=========')
-  # Time and play games
-  start_time = time.time()
-  grs = []
-
-  grs += multiplay(b1, b2, games_count, elos)
-  if swap_colors:
-    grs += multiplay(b2, b1, games_count, elos)  # switch colors
-  end_time = time.time()
-  print('Total Time: ' + str((end_time - start_time)))
-  print()
-
-  return grs
-
-
-# Play round robin tourney
-def play_tournament(bots, match_length, swap_colors, elos):
-  start_time = time.time()
-  match_total = len(bots) ** 2
-  match_count = 0
-  grs = []
-  for b1 in bots:
-    for b2 in bots:
-      match_count += 1
-      # Play a single one-sided match (no color swapping)
-      print('Match ' + str(match_count) + '/' + str(match_total))
-      grs += play_match(b1, b2, match_length, swap_colors, elos)
-  total_time = time.time() - start_time
-  print('Total time for tournament: ' + str(total_time))
-  return grs
