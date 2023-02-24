@@ -6,4 +6,6 @@ stockfish/
 *.png
 *.csv
 
+node_modules/
+build/
 __pycache__/

@@ -92,7 +92,7 @@ class BerserkBot(ChessBot):
     elif captures_arr:
       return random.choice(captures_arr), 'Capture Spotted'
     else:
-      return random.choice(moves_arr), 'Nothing Spotted'
+      return random.choice(moves_arr), ''
 
   def __str__(self):
     return "Berserk"
@@ -107,9 +107,9 @@ class PacifistBot(ChessBot):
     safe_moves_arr = [move for move in moves_arr if
                       (not board.gives_check(move)) and (not board.is_capture(move))]
     if safe_moves_arr:
-      return random.choice(safe_moves_arr), 'Safe move spotted'
+      return random.choice(safe_moves_arr), ''
     else:
-      return random.choice(moves_arr), 'I must resort to violence'
+      return random.choice(moves_arr), '!'
 
   def __str__(self):
     return "Pacifist"
@@ -121,9 +121,9 @@ class DanceKingBot(ChessBot):
     moves_arr = [move for move in board.generate_legal_moves()]
     king_moves = [move for move in moves_arr if move.from_square == board.king(board.turn)]
     if king_moves:
-      return random.choice(king_moves), 'King going in!'
+      return random.choice(king_moves), '!'
     else:
-      return random.choice(moves_arr), 'Im trapped!'
+      return random.choice(moves_arr), ''
 
   def __str__(self):
     return "DanceKing"
@@ -141,10 +141,10 @@ class SuicideKingBot(ChessBot):
       curr_dist = chess.square_distance(board.king(board.turn), target_square)
       # If the closest king move would move it farther from the enemy king, pass
       if chess.square_distance(king_moves[0].to_square, target_square) >= curr_dist:
-        return random.choice(moves_arr), 'King is close enough!'
-      return king_moves[0], 'King closing distance!'
+        return random.choice(moves_arr), ''
+      return king_moves[0], '!'
     else:
-      return random.choice(moves_arr), 'No king moves!!'
+      return random.choice(moves_arr), '?'
 
   def __str__(self):
     return "SuicideKing"
@@ -159,11 +159,10 @@ class PanicFishBot(ChessBot):
 
   def make_move(self, board):
     if board.is_check():
-      return move_rand(board), "Panic!!!"
+      return move_rand(board), "!?"
     else:
-      comment = 'Calm' + str(self.limit.time)
       result = self.engine.play(board, self.limit)
-      return result.move, comment
+      return result.move, ''
 
   def __str__(self):
     return "PanicFish"
@@ -186,13 +185,13 @@ class SharkFishBot(ChessBot):
     # Excitement Case
     if self.excitement_time > 0:
       if self.excitement_time <= self.frenzy_time:
-        comment = 'Frenzy! for [' + str(self.excitement_time) + '] turns'
+        comment = 'frenzy[' + str(self.excitement_time) + ']'
         result = self.engine.play(board, self.limit)
         self.excitement_time -= 1
         return result.move, comment
       else:
         move, comment = self.shallow_bot.make_move(board)
-        lurk_comment = '...lurking... for [' + str(self.excitement_time) + '] turns'
+        lurk_comment = 'lurk[' + str(self.excitement_time) + ']'
         comment = lurk_comment + ' --- ' + comment
         self.excitement_time -= 1
         return move, comment
@@ -200,7 +199,7 @@ class SharkFishBot(ChessBot):
     move, comment = self.shallow_bot.make_move(board)
     if board.gives_check(move) or board.is_capture(move):
       self.excitement_time = self.lurk_time + self.frenzy_time
-      comment = '...smelling blood... --- ' + comment
+      comment = '!' + comment
     return move, comment
 
   def __str__(self):

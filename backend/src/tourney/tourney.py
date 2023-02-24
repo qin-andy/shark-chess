@@ -3,9 +3,10 @@ import time
 import chess
 import chess.pgn
 import pandas as pd
+import os
 
-from src.bots.bots import ChessBot
-from src.tourney.elo import calculate_elos
+from bots.bots import ChessBot
+from tourney.elo import calculate_elos
 
 
 class Player:
@@ -81,7 +82,7 @@ class GameResult:
 
 class TourneyManager:
   def __init__(self, players: list[Player], match_length: int):
-    self.concluded = False
+    self.concluded = False # TODO : remove or refactor
     self.players = players
     self.match_length = match_length
     self.game_results: list[GameResult] = []
@@ -101,7 +102,8 @@ class TourneyManager:
       else:
         move, comment = bp.move(board)
       node = node.add_variation(move)
-      node.comment = comment
+      if comment != '': # empty comments mean no comment (!)
+        node.comment = comment
       board.push(move)
       turns += 1
     game.end()
@@ -160,11 +162,10 @@ class TourneyManager:
         grs += self.play_match(p1, p2, match_length, False)
     total_time = time.time() - start_time
     print('Total time for tournament: ' + str(total_time))
+    self.game_results = grs
     return grs
 
   def to_csv(self) -> str:
-    if not self.concluded:
-      return ""
     winners = []
     reasons = []
     moves = []
@@ -193,7 +194,11 @@ class TourneyManager:
       'White': whites,
       'Black': blacks
     }
+
     df = pd.DataFrame(game_data)
+    cwd = os.getcwd()
+    print(cwd)
+    print("HELLO")
     df.to_csv('output.csv', encoding='utf-8-sig')
     # files.download('output.csv')
 
