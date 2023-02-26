@@ -7,77 +7,8 @@ import os
 
 from bots.bots import ChessBot
 from tourney.elo import calculate_elos
-
-
-class Player:
-  def __init__(self, bot: ChessBot, friendly_name):
-    self.friendly_name = friendly_name
-    self.bot = bot
-    self.elo = 800  # default Elo
-
-  def move(self, board):
-    return self.bot.make_move(board)
-
-  def __str__(self):
-    return self.friendly_name
-
-
-class GameResult:
-  def __init__(self):
-    self.white_player: str = None
-    self.black_player: str = None
-    self.winner: str = None
-    self.r: float = None  # numerical value representing result. 1=w, 0.5=d, 0=b
-    self.moves: int = None
-    self.time: float = None
-    self.pgn: str = None
-    self.end_reason: str = None
-    self.pc_game = None
-    self.pc_board = None
-
-  def update(self, wp: Player, bp: Player,
-             board: chess.Board, game: chess.pgn.Game):
-    # Basic Naming
-    self.white_player = str(wp)
-    self.black_player = str(bp)
-    self.moves = board.fullmove_number
-
-    game.headers['Event'] = "Bot Match"
-    game.headers['White'] = str(wp)
-    game.headers['Black'] = str(bp)
-
-    self.pgn = str(game)
-
-    # For testing, remove later-
-    self.pc_board = board
-    self.pc_game = game
-
-    # Outcome logic
-    outcome = board.outcome()
-    # No board outcome means turn limit was hit
-    if outcome is None:
-      self.winner = 'Draw'
-      self.end_reason = 'Turn Limit'
-    else:
-      self.end_reason = outcome.termination.name
-      if outcome.winner is None:
-        # No winner means stalemate
-        self.winner = 'Stalemate'
-        self.r = 0.5
-      else:
-        # Winner is either black or white bot
-        if outcome.winner:
-          self.winner = str(wp)
-          self.r = 1
-        else:
-          self.winner = str(bp)
-          self.r = 0
-    return self
-
-  def __str__(self):
-    result = ""
-    result += self.white_player + " vs " + self.black_player
-    return result
+from tourney.game_result import GameResult
+from tourney.player import Player
 
 
 class TourneyManager:
@@ -85,6 +16,7 @@ class TourneyManager:
     self.concluded = False # TODO : remove or refactor
     self.players = players
     self.match_length = match_length
+    self.elo_k = 32
     self.game_results: list[GameResult] = []
 
   # Play a single game between players
@@ -111,14 +43,27 @@ class TourneyManager:
     game_result.update(wp, bp, board, game)
     game_result.time = time.time() - start_time
     return game_result
+  
+  def update_player_data(self, wp: Player, bp: Player, gr: GameResult):
+    # Updates player ELO, wins, losses, draws after reuslt
 
-  # Actually play the games
-  def update_elos(self, wp: Player, bp: Player, d, elo_k=32):
-    if str(wp) == str(bp):
-      return
+    d = 0 # default
+    if gr.winning_color == 'white':
+      d = 1 # for elo calc
+      wp.wins += 1
+      bp.losses += 1
+    elif gr.winning_color == 'black':
+      d = 0 # for elo calc
+      wp.losses += 1
+      bp.wins += 1
+    else: # draw case
+      d = 0.5
+      bp.draws += 1
+      wp.draws += 1 
 
-    wp.elo, bp.elo = calculate_elos(wp.elo, bp.elo, elo_k, d)
+    wp.elo, bp.elo = calculate_elos(wp.elo, bp.elo, self.elo_k, d)
     print(str(wp) + ': ' + str(wp.elo) + ', ' + str(bp) + ': ' + str(bp.elo))
+  
 
   # Helper to play multiple games between two bots
   def play_match(self, p1: Player, p2: Player, count, swap_colors=False):
@@ -126,14 +71,13 @@ class TourneyManager:
 
     # Time and play games
     start_time = time.time()
-    elo_k = 32  # elo_k = 32, TODO: read from options
     grs = []  # game results array
 
     for i in range(count):
       print('Game [' + str(i + 1) + '/' + str(count) + "] of [" + str(p1) + "] vs [" + str(p2) + "]")
       gr = self.play_game(p1, p2, 300)
-      print(gr.winner + ' wins in [' + str(gr.moves) + '] turns in [' + str(gr.time) + '] seconds')
-      self.update_elos(p1, p2, gr.r, elo_k)
+      print(gr.winning_player + ' wins in [' + str(gr.moves) + '] turns in [' + str(gr.time) + '] seconds')
+      self.update_player_data(p1, p2, gr)
       grs.append(gr)
 
     if swap_colors:  # TODO: Recursive case, could be cleaner
@@ -146,27 +90,30 @@ class TourneyManager:
     return grs
 
   # Play round robin tourney
+  # Skips mirror matches
   def play_tournament(self):
     players = self.players
     match_length = self.match_length
 
     start_time = time.time()
-    match_total = len(players) ** 2
+    match_total = (len(players) ** 2)- len(players)
     match_count = 0
     grs = []
     for p1 in players:
       for p2 in players:
-        match_count += 1
-        # Play a single one-sided match (no color swapping)
-        print('Match ' + str(match_count) + '/' + str(match_total))
-        grs += self.play_match(p1, p2, match_length, False)
+        if str(p1) != str(p2): #skip self play matches
+          match_count += 1
+          # Play a single one-sided match (no color swapping)
+          print('Match ' + str(match_count) + '/' + str(match_total))
+          grs += self.play_match(p1, p2, match_length, False)
     total_time = time.time() - start_time
     print('Total time for tournament: ' + str(total_time))
     self.game_results = grs
     return grs
 
-  def to_csv(self) -> str:
-    winners = []
+  def export_game_data(self) -> str:
+    winning_players = []
+    winning_colors = []
     reasons = []
     moves = []
     times = []
@@ -176,7 +123,8 @@ class TourneyManager:
 
     # Unzip array of game objects into arrays
     for gr in self.game_results:
-      winners.append(gr.winner)
+      winning_players.append(gr.winning_player)
+      winning_colors.append(gr.winning_color)
       reasons.append(gr.end_reason)
       moves.append(gr.moves)
       times.append(gr.time)
@@ -186,7 +134,8 @@ class TourneyManager:
 
     # Settingup data in dict
     game_data = {
-      'Winner': winners,
+      'Winning Player': winning_players,
+      'Winning Color': winning_colors,
       'End Reason': reasons,
       'Moves': moves,
       'Time': times,
@@ -199,6 +148,34 @@ class TourneyManager:
     cwd = os.getcwd()
     print(cwd)
     print("HELLO")
-    df.to_csv('output.csv', encoding='utf-8-sig')
+    df.to_csv('game_output.csv', encoding='utf-8-sig')
+
     # files.download('output.csv')
+
+  # exports player data
+  def export_player_data(self):
+    # player data
+    names = []
+    elos = []
+    wins = []
+    losses = []
+    draws = []
+
+    for player in self.players:
+      names.append(player.friendly_name)
+      elos.append(player.elo)
+      wins.append(player.wins)
+      losses.append(player.losses)
+      draws.append(player.draws)
+
+    player_data = {
+      'Name': names,
+      'Elo': elos,
+      'Wins': wins,
+      'Losses': losses,
+      'Draws': draws,
+    }
+
+    df2 = pd.DataFrame(player_data)
+    df2.to_csv('player_output.csv', encoding='utf-8-sig')
 

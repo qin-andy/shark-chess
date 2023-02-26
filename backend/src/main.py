@@ -9,6 +9,7 @@ def player_game_test():
   bot_ar = AlwaysRandomBot()
   bot_sk = SuicideKingBot()
   bot_pacifist = PacifistBot()
+  bot_berserk = BerserkBot()
 
   # Stockfish Bots\
 
@@ -21,26 +22,34 @@ def player_game_test():
   base_limit = chess.engine.Limit(time=0.1, depth=10)
 
   bot_sf = Stockfish100Bot(engine, base_limit)
+  bot_sf_5 = WaterBot(bot_sf, bot_ar, 0.05)
+  bot_sf_10 = WaterBot(bot_sf, bot_ar, 0.1)
+  bot_sf_20 = WaterBot(bot_sf, bot_ar, 0.2)
+
+  player_ar = Player(bot_ar, "Random")
+  player_sk = Player(bot_sk, "Suicide King")
+  player_pacifist = Player(bot_pacifist, "Pacifist")
+  player_berserk = Player(bot_berserk, "Berserk")
 
 
-  player_ar = Player(bot_ar, "RandomPlayer")
-  player_sk = Player(bot_sk, "SKPlayer")
-  player_pacifist = Player(bot_pacifist, "PacifistPlayer")
-  player_sf = Player(bot_sf, "Stockfish100")
+  player_sf = Player(bot_sf, "Stockfish 100")
+  player_sf_5 = Player(bot_sf_5, "Stockfish 5")
+  player_sf_10 = Player(bot_sf_10, "Stockfish 10")
+  player_sf_20 = Player(bot_sf_20, "Stockfish 20")
 
-  players = [player_sk, player_ar]
+  players = [player_sk, player_ar, player_pacifist, player_sf, player_berserk, ]
+            #  player_sf_5, player_sf_10, player_sf_20]
+  
   # gr = play_game(player_sk, player_pacifist, 300)
   # play_match(player_pacifist, player_sk, 5, True)
-  tourney = TourneyManager(players, 10)
+  tourney = TourneyManager(players, 3)
   tourney.play_tournament()
-  tourney.to_csv()
+  tourney.export_game_data()
+  tourney.export_player_data()
   engine.close()
 
 
 if __name__ == '__main__':
-  # play_test_game()
-  # play_test_match()
-  # play_test_tourney()
   player_game_test()
 
 
