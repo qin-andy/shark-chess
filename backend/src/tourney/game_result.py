@@ -16,6 +16,7 @@ class GameResult:
     self.end_reason: str = None
     self.pc_game = None
     self.pc_board = None
+    self.matchup_id: str = None
 
   def update(self, wp: Player, bp: Player,
              board: chess.Board, game: chess.pgn.Game):
@@ -28,11 +29,19 @@ class GameResult:
     game.headers['White'] = str(wp)
     game.headers['Black'] = str(bp)
 
-    self.pgn = str(game)
+    # TODO : configuration options for exporting comments and headers?
+    exporter = chess.pgn.StringExporter(headers=False, variations=False, comments=False)
+    pgn_string = game.accept(exporter)
 
-    # For testing, remove later-
+    # self.pgn = str(game) # pgn w/ comments, headers, etc
+    self.pgn = pgn_string # pgn w/ no extras
+
+    # TODO : For testing whiel auditting, remove later
     self.pc_board = board
     self.pc_game = game
+
+    # Matchup id (w[id],b[id])
+    self.matchup_id = str(wp.id) + ',' + str(bp.id)
 
     # Outcome logic
     outcome = board.outcome()

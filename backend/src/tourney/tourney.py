@@ -95,6 +95,12 @@ class TourneyManager:
     players = self.players
     match_length = self.match_length
 
+    # build player ids (refactor later?)
+    counter = 0
+    for player in self.players:
+      player.id = counter
+      counter += 1
+
     start_time = time.time()
     match_total = (len(players) ** 2)- len(players)
     match_count = 0
@@ -120,6 +126,7 @@ class TourneyManager:
     pgns = []
     whites = []
     blacks = []
+    matchup_ids = []
 
     # Unzip array of game objects into arrays
     for gr in self.game_results:
@@ -131,9 +138,11 @@ class TourneyManager:
       pgns.append(gr.pgn)
       whites.append(gr.white_player)
       blacks.append(gr.black_player)
+      matchup_ids.append(gr.matchup_id)
 
     # Settingup data in dict
     game_data = {
+      'Matchup ID': matchup_ids,
       'Winning Player': winning_players,
       'Winning Color': winning_colors,
       'End Reason': reasons,
@@ -147,8 +156,7 @@ class TourneyManager:
     df = pd.DataFrame(game_data)
     cwd = os.getcwd()
     print(cwd)
-    print("HELLO")
-    df.to_csv('game_output.csv', encoding='utf-8-sig')
+    df.to_csv('game_output.csv', encoding='utf-8-sig', index=False)
 
     # files.download('output.csv')
 
@@ -156,6 +164,7 @@ class TourneyManager:
   def export_player_data(self):
     # player data
     names = []
+    ids = []
     elos = []
     wins = []
     losses = []
@@ -163,6 +172,7 @@ class TourneyManager:
 
     for player in self.players:
       names.append(player.friendly_name)
+      ids.append(player.id)
       elos.append(player.elo)
       wins.append(player.wins)
       losses.append(player.losses)
@@ -170,6 +180,7 @@ class TourneyManager:
 
     player_data = {
       'Name': names,
+      'ID': ids,
       'Elo': elos,
       'Wins': wins,
       'Losses': losses,
@@ -177,5 +188,5 @@ class TourneyManager:
     }
 
     df2 = pd.DataFrame(player_data)
-    df2.to_csv('player_output.csv', encoding='utf-8-sig')
+    df2.to_csv('player_output.csv', encoding='utf-8-sig', index=False)
 

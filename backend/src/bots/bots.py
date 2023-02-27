@@ -8,16 +8,8 @@ import chess.engine
 
 # Base chess bot
 class ChessBot:
-  def __init__(self):
-    # for storing "move reasoning" for inspection
-    self.logs = []
-    self.reasoning = ""
-
   def make_move(self, board: chess.Board) -> typing.Tuple[chess.Move, str]:
     pass
-
-  def get_reasoning(self):
-    return self.reasoning
 
   def __str__(self):
     return "Base"
@@ -33,7 +25,7 @@ def move_rand(board: chess.Board) -> chess.Move:
 # Always random move bot
 class AlwaysRandomBot(ChessBot):
   def make_move(self, board):
-    return move_rand(board), 'random'
+    return move_rand(board), ''
 
   def __str__(self):
     return "AlwaysRandom"
@@ -70,10 +62,10 @@ class WaterBot(ChessBot):
     move = chess.Move
     if random.random() <= self.water_ratio:
       move, comment = self.b1.make_move(board)
-      return move, 'W[o]-' + comment
+      return move, '+' + comment
     else:
       move, comment = self.b2.make_move(board)
-      return move, 'W[x]-' + comment
+      return move, '-' + comment
 
   def __str__(self):
     if self.custom_name == None:
@@ -88,9 +80,9 @@ class BerserkBot(ChessBot):
     captures_arr = [move for move in board.generate_legal_moves() if board.is_capture(move)]
     moves_arr = [move for move in board.generate_legal_moves()]
     if checks_arr:
-      return random.choice(checks_arr), 'Check Spotted'
+      return random.choice(checks_arr), 'Check'
     elif captures_arr:
-      return random.choice(captures_arr), 'Capture Spotted'
+      return random.choice(captures_arr), 'Capture'
     else:
       return random.choice(moves_arr), ''
 

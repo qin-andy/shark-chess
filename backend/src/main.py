@@ -37,12 +37,14 @@ def player_game_test():
   player_sf_10 = Player(bot_sf_10, "Stockfish 10")
   player_sf_20 = Player(bot_sf_20, "Stockfish 20")
 
-  players = [player_sk, player_ar, player_pacifist, player_sf, player_berserk, ]
-            #  player_sf_5, player_sf_10, player_sf_20]
+  players_0 = [player_sk, player_ar, player_pacifist, player_sf, player_berserk,
+              player_sf_5, player_sf_10, player_sf_20]
   
+  players_1 = [player_sk, player_ar, player_pacifist, player_berserk, player_sf_5]
+
   # gr = play_game(player_sk, player_pacifist, 300)
   # play_match(player_pacifist, player_sk, 5, True)
-  tourney = TourneyManager(players, 3)
+  tourney = TourneyManager(players_1, 10)
   tourney.play_tournament()
   tourney.export_game_data()
   tourney.export_player_data()
