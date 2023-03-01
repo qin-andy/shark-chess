@@ -127,6 +127,7 @@ class TourneyManager:
     whites = []
     blacks = []
     matchup_ids = []
+    ending_fens = []
 
     # Unzip array of game objects into arrays
     for gr in self.game_results:
@@ -139,6 +140,7 @@ class TourneyManager:
       whites.append(gr.white_player)
       blacks.append(gr.black_player)
       matchup_ids.append(gr.matchup_id)
+      ending_fens.append(gr.ending_fen)
 
     # Settingup data in dict
     game_data = {
@@ -150,7 +152,8 @@ class TourneyManager:
       'Time': times,
       'PGN': pgns,
       'White': whites,
-      'Black': blacks
+      'Black': blacks,
+      'Ending FEN': ending_fens
     }
 
     df = pd.DataFrame(game_data)

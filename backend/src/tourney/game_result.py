@@ -17,6 +17,7 @@ class GameResult:
     self.pc_game = None
     self.pc_board = None
     self.matchup_id: str = None
+    self.ending_fen: str = None
 
   def update(self, wp: Player, bp: Player,
              board: chess.Board, game: chess.pgn.Game):
@@ -35,6 +36,7 @@ class GameResult:
 
     # self.pgn = str(game) # pgn w/ comments, headers, etc
     self.pgn = pgn_string # pgn w/ no extras
+    self.ending_fen = board.fen()
 
     # TODO : For testing whiel auditting, remove later
     self.pc_board = board
