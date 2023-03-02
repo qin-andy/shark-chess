@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { GameResult, Player } from '../types';
-import { aggregateMatchups, processGamesResponse, processPlayerResponse, summarizeMatch } from '../util/response';
+import { aggregateMatchups, processGamesResponse, processPlayerResponse } from '../util/response';
+import Cell from './Cell';
 
 const Chart = () => {
   const [games, setGames] = useState<GameResult[]>();
@@ -57,26 +58,14 @@ const Chart = () => {
     for (let y = 0; y < dimension; y++) {
       const cells_x = [];
       for (let x = 0; x < dimension; x++) {
-        const matchSummary = summarizeMatch(matchups[x][y]);
         cells_x.push(
-          <div style={{borderStyle: 'solid'}}>
-            <p>
-              ({x},{y})
-            </p>
-            <p>
-                {matchups[x][y] == null ? '' 
-                : matchups[x][y][0] == null ? 'x' :  matchups[x][y][0].white}
-            </p>            
-            <p>
-                {matchups[x][y] == null ? '' 
-                : matchups[x][y][0] == null ? 'x' :  matchups[x][y][0].black}
-            </p>
-            <p>
-              {matchSummary[0]}/
-              {matchSummary[1]}/
-              {matchSummary[2]}
-            </p>
-          </div>
+          <Cell 
+            key={x + ',' + y}
+            x={x} 
+            y={y}
+            players={players}
+            games={matchups[x][y]}
+          />
         )
       }
       cells_y.push(cells_x);
