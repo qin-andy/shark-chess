@@ -1,4 +1,4 @@
-export const dummyGames = [
+[
   {
     "_id": {
       "$oid": "63ff99cc60dbe56023abc156"
@@ -2999,62 +2999,4 @@ export const dummyGames = [
     "Black": "Berserk",
     "Ending FEN": "2r1k3/3p2pr/2pK3p/2p4P/3q4/p7/3N4/5bNR w - - 1 35"
   }
-];
-
-export const dummyPlayers = [
-  {
-    "_id": {
-      "$oid": "63ff99cc60dbe56023abc21e"
-    },
-    "Name": "Suicide King",
-    "ID": 0,
-    "Elo": 786,
-    "Wins": 17,
-    "Losses": 24,
-    "Draws": 39
-  },
-  {
-    "_id": {
-      "$oid": "63ff99cc60dbe56023abc21f"
-    },
-    "Name": "Random",
-    "ID": 1,
-    "Elo": 782,
-    "Wins": 14,
-    "Losses": 8,
-    "Draws": 58
-  },
-  {
-    "_id": {
-      "$oid": "63ff99cc60dbe56023abc220"
-    },
-    "Name": "Pacifist",
-    "ID": 2,
-    "Elo": 514,
-    "Wins": 0,
-    "Losses": 54,
-    "Draws": 26
-  },
-  {
-    "_id": {
-      "$oid": "63ff99cc60dbe56023abc221"
-    },
-    "Name": "Berserk",
-    "ID": 3,
-    "Elo": 948,
-    "Wins": 45,
-    "Losses": 1,
-    "Draws": 34
-  },
-  {
-    "_id": {
-      "$oid": "63ff99cc60dbe56023abc222"
-    },
-    "Name": "Stockfish 5",
-    "ID": 4,
-    "Elo": 783,
-    "Wins": 22,
-    "Losses": 11,
-    "Draws": 47
-  }
-];
+]

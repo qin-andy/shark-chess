@@ -29,4 +29,3 @@ export interface Player {
   losses: number,
   draws: number,
 }
-

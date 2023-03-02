@@ -43,6 +43,46 @@ export const processPlayerResponse = (data: any) => {
   return results;
 }
 
+export const aggregateMatchups = (games: GameResult[], players: Player[]) => {
+  // matches[white player id][black player id][game number]
+  const matches: any = {};
+
+  games.forEach((game) => {
+    const players = game.matchupId.split(',');
+    const white = players[0];
+    const black = players[1];
+    if (matches[white] == null) {
+      matches[white] = {};
+    }
+    if (matches[white][black] == null) {
+      matches[white][black] = [];
+    }
+    matches[white][black].push(game);
+  });
+
+  // fill mirror matches
+  players.forEach((player, index) => {
+    matches[index][index] = []
+  });
+  return matches;
+}
+
+export const summarizeMatch = (results: GameResult[]) => {
+  let wins = 0;
+  let losses = 0;
+  let draws = 0;
+  results.forEach((result) => {
+    if (result.winningColor == 'white') {
+      wins += 1
+    } else if (result.winningColor == 'black') {
+      losses += 1
+    } else {
+      draws += 1
+    }
+  });
+  return [wins, losses, draws]
+}
+
 
 let testGame = {
   "_id": {

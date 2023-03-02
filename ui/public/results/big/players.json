@@ -1,0 +1,57 @@
+[
+  {
+    "_id": {
+      "$oid": "63fea94f2d056dff81a5efdd"
+    },
+    "Name": "Suicide King",
+    "ID": 0,
+    "Elo": 566,
+    "Wins": 94,
+    "Losses": 132,
+    "Draws": 174
+  },
+  {
+    "_id": {
+      "$oid": "63fea94f2d056dff81a5efde"
+    },
+    "Name": "Random",
+    "ID": 1,
+    "Elo": 616,
+    "Wins": 68,
+    "Losses": 65,
+    "Draws": 267
+  },
+  {
+    "_id": {
+      "$oid": "63fea94f2d056dff81a5efdf"
+    },
+    "Name": "Pacifist",
+    "ID": 2,
+    "Elo": 391,
+    "Wins": 1,
+    "Losses": 250,
+    "Draws": 149
+  },
+  {
+    "_id": {
+      "$oid": "63fea94f2d056dff81a5efe0"
+    },
+    "Name": "Berserk",
+    "ID": 3,
+    "Elo": 734,
+    "Wins": 163,
+    "Losses": 6,
+    "Draws": 231
+  },
+  {
+    "_id": {
+      "$oid": "63fea94f2d056dff81a5efe1"
+    },
+    "Name": "Stockfish 5",
+    "ID": 4,
+    "Elo": 706,
+    "Wins": 151,
+    "Losses": 24,
+    "Draws": 225
+  }
+]
