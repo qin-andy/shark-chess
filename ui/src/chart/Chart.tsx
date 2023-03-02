@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { GameResult, Player } from '../types';
-import { dummyGames, dummyPlayers } from '../util/dummy';
 import { aggregateMatchups, processGamesResponse, processPlayerResponse, summarizeMatch } from '../util/response';
 
 const Chart = () => {
