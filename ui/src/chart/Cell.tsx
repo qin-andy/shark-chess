@@ -1,5 +1,6 @@
 import React, { CSSProperties, useState } from 'react';
 import { GameResult, Player } from '../types';
+import CellList from './CellList';
 
 const Cell = (props: {
   x: number,
@@ -42,32 +43,6 @@ const Cell = (props: {
     backgroundColor: `rgb(${r},${g},${b})`
   };
 
-  let listComponent = (
-    <div
-      style = {{
-        position: 'absolute',
-        backgroundColor: 'whitesmoke', 
-        zIndex: 10,
-        top: '10px',
-        left: '120px',
-        width: '300px',
-        height: '400px',
-        border: '3px solid',
-        overflowY: 'auto'
-      }}
-    >
-      <p>{wp} vs {bp}</p>
-      <ul>
-        {games.map((game, idx) => {
-          return (
-            <li key={idx} onClick={() => console.log(game.endingFEN)}>
-              {game.winningPlayer} wins in {game.moves} moves
-            </li>
-          )
-        })}
-      </ul>
-    </div>
-  )
 
   return (
     <>
@@ -76,7 +51,7 @@ const Cell = (props: {
         onClick={handleClick}
         onMouseLeave={handleMouseLeave}
       >
-        {showList ? listComponent : null}
+        {showList ? <CellList wp={wp} bp={bp} games={games} /> : null}
         <p>{x},{y}</p>
         <p>white: {wp}</p>
         <p>black: {bp}</p>
@@ -85,6 +60,7 @@ const Cell = (props: {
     </>
   )
 }
+
 
 const generateRGB = (w: number, l: number, d: number) => {
   let r = 0;
@@ -120,5 +96,7 @@ const summarizeMatch = (results: GameResult[]) => {
   });
   return [wins, losses, draws]
 }
+
+
 
 export default Cell;
