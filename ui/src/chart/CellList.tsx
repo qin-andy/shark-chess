@@ -16,9 +16,9 @@ const CellList = (props: {
     top: '10px',
     left: '120px',
     width: '300px',
-    height: '400px',
+    height: '500px',
     border: '3px solid',
-    overflowY: 'auto'
+    overflowY: 'auto',
   };
 
   return (
@@ -26,8 +26,8 @@ const CellList = (props: {
       style={style}
     >
       <p>{wp} vs {bp}</p>
-      {games.map((game) => {
-        return <CellListItem game={game} />
+      {games.map((game, idx) => {
+        return <CellListItem key={idx} game={game} />
       })}
     </div>
   )
