@@ -43,6 +43,7 @@ export const processPlayerResponse = (data: any) => {
   return results;
 }
 
+// generates 2d array indexted by matchups
 export const aggregateMatchups = (games: GameResult[], players: Player[]) => {
   // matches[white player id][black player id][game number]
   const matches: any = {};

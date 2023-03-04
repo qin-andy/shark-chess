@@ -9,20 +9,41 @@ const Cell = (props: {
   games: GameResult[]
 }) => {
   const [showList, setShowList] = useState(false);
+  const [showListTimer, setShowListTimer] = useState<NodeJS.Timer>();
 
   const handleClick = () => {
     setShowList(true)
+    // if (showListTimer) clearTimeout(showListTimer);
+  }
+
+  const handleHover = () => {
+    // if (showListTimer) clearTimeout(showListTimer);
   }
 
   const handleMouseLeave = () => {
-    setShowList(false);
+    // let timer = setTimeout(() => {
+      setShowList(false);
+    // }, 1000)
+    // setShowListTimer(timer);
   }
 
   let { x, y, games, players } = props;
   let style: CSSProperties = {
-    borderStyle: 'solid',
-    position: 'relative'
+    border: ' 2px solid',
+    borderRadius: '15px',
+    position: 'relative',
+    padding: '0px',
+    margin: '0px', 
+
+    fontSize: '14px',
+    textAlign: 'center',
   };
+  
+  let playerDisplayStyle: CSSProperties = {
+    // border: '3px solid',
+    // borderRadius: '15px',
+    margin: '2px',
+  }
 
   // Mirror match case, show nothing
   if (x === y) {
@@ -43,24 +64,23 @@ const Cell = (props: {
     backgroundColor: `rgb(${r},${g},${b})`
   };
 
-
   return (
     <>
       <div 
         style={new_style}
         onClick={handleClick}
+        onMouseEnter={handleHover}
         onMouseLeave={handleMouseLeave}
       >
         {showList ? <CellList wp={wp} bp={bp} games={games} /> : null}
-        <p>{x},{y}</p>
-        <p>white: {wp}</p>
-        <p>black: {bp}</p>
+        <p/>
+        <p style={playerDisplayStyle}>{wp}</p>
+        <p style={playerDisplayStyle}>{bp}</p>
         <p>{w}/{l}/{d}</p>
       </div>
     </>
   )
 }
-
 
 const generateRGB = (w: number, l: number, d: number) => {
   let r = 0;
@@ -68,15 +88,16 @@ const generateRGB = (w: number, l: number, d: number) => {
   let b = 0;
 
   let total = w + l + d;
-  let max = 255;
+  // Max ratio, set in order to make colors more pastel
+  let max = 190; 
 
   let w_ratio = w / total;
   let l_ratio = l / total; // L + ratio + you fell off + didn't ask
   let d_ratio = d / total;
 
-  r = w_ratio * max;
-  g = l_ratio * max;
-  b = d_ratio * max;
+  r = l_ratio * max + 64; // LOSSES
+  g = d_ratio * (max/2) + 127;  // DRAWS weighted less, seeing wins/losses is bigger
+  b = w_ratio * max + 127; // WINS
 
   return [r, g, b];
 }
@@ -96,7 +117,5 @@ const summarizeMatch = (results: GameResult[]) => {
   });
   return [wins, losses, draws]
 }
-
-
 
 export default Cell;

@@ -14,7 +14,7 @@ const CellListItem = (props: {
 
   const onMouseLeave = () => {
     setHover(false)
-    setClicked(false);
+    // setClicked(false);
   }
 
   const onMouseClick = () => {
@@ -23,18 +23,26 @@ const CellListItem = (props: {
 
   let { game } = props;
 
+  // Coloring
+  let bgColor = 'white';
+  if (game.winningColor === 'black') bgColor = 'gray';
+  else if (game.winningColor === 'white') bgColor = 'silver';
+
   let style: CSSProperties = {
     border: 'solid 1px',
-    backgroundColor: hover ? 'gray' : 'whitesmoke'
+    backgroundColor: bgColor,
+
+    display: 'flex', 
+    flexDirection: 'column',
+    alignItems: 'center',
   }
 
   return (
     <div 
       style={style} 
-      onClick={() => console.log(game.endingFEN)}
+      onClick={onMouseClick}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      onMouseDown={onMouseClick}
     >
       {game.winningPlayer} wins in {game.moves} moves
       {clicked ? <GamePreview game={game} /> : null}

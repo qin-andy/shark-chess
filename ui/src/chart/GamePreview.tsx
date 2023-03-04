@@ -23,7 +23,6 @@ const GamePreview = (props: {
 
   useEffect(() => {
     new Chessboard(divRef.current, {position: fen});
-    console.log("Showing game preview");
   }, [])
 
   let fen = game.endingFEN;

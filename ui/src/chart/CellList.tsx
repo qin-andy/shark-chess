@@ -14,11 +14,13 @@ const CellList = (props: {
     backgroundColor: 'whitesmoke', 
     zIndex: 10,
     top: '10px',
-    left: '120px',
+    left: '80px',
     width: '300px',
-    height: '500px',
     border: '3px solid',
     overflowY: 'auto',
+
+    display: 'flex', 
+    flexDirection: 'column',
   };
 
   return (
