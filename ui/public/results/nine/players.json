@@ -1,0 +1,74 @@
+[
+  {
+    "Name": "Suicide King",
+    "ID": 0,
+    "Elo": 485,
+    "Wins": 24,
+    "Losses": 95,
+    "Draws": 41
+  },
+  {
+    "Name": "Random",
+    "ID": 1,
+    "Elo": 619,
+    "Wins": 14,
+    "Losses": 72,
+    "Draws": 74
+  },
+  {
+    "Name": "Pacifist",
+    "ID": 2,
+    "Elo": 346,
+    "Wins": 1,
+    "Losses": 128,
+    "Draws": 31
+  },
+  {
+    "Name": "Stockfish 100",
+    "ID": 3,
+    "Elo": 1282,
+    "Wins": 157,
+    "Losses": 2,
+    "Draws": 1
+  },
+  {
+    "Name": "Berserk",
+    "ID": 4,
+    "Elo": 711,
+    "Wins": 39,
+    "Losses": 43,
+    "Draws": 78
+  },
+  {
+    "Name": "Stockfish 5",
+    "ID": 5,
+    "Elo": 613,
+    "Wins": 32,
+    "Losses": 62,
+    "Draws": 66
+  },
+  {
+    "Name": "Stockfish 10",
+    "ID": 6,
+    "Elo": 581,
+    "Wins": 36,
+    "Losses": 55,
+    "Draws": 69
+  },
+  {
+    "Name": "Stockfish 20",
+    "ID": 7,
+    "Elo": 686,
+    "Wins": 74,
+    "Losses": 45,
+    "Draws": 41
+  },
+  {
+    "Name": "Panicfish",
+    "ID": 8,
+    "Elo": 1158,
+    "Wins": 142,
+    "Losses": 17,
+    "Draws": 1
+  }
+]

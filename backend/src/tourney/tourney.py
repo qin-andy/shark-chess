@@ -1,3 +1,4 @@
+import json
 import time
 
 import chess
@@ -159,7 +160,11 @@ class TourneyManager:
     df = pd.DataFrame(game_data)
     cwd = os.getcwd()
     print(cwd)
-    df.to_csv('game_output.csv', encoding='utf-8-sig', index=False)
+    data = df.to_dict('records')
+
+    json_data = json.dumps(data, indent=2)
+    with open('games.json', 'w') as file:
+      file.write(json_data,)
 
     # files.download('output.csv')
 
@@ -191,5 +196,8 @@ class TourneyManager:
     }
 
     df2 = pd.DataFrame(player_data)
-    df2.to_csv('player_output.csv', encoding='utf-8-sig', index=False)
+    data = df2.to_dict('records')
+    json_data = json.dumps(data, indent=2)
+    with open('players.json', 'w') as file:
+      file.write(str(json_data),)
 
