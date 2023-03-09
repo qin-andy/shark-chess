@@ -3,31 +3,14 @@ import { GameResult, Player } from '../types';
 import { aggregateMatchups, processGamesResponse, processPlayerResponse } from '../util/response';
 import Cell from './Cell';
 
-const Chart = () => {
-  const [games, setGames] = useState<GameResult[]>();
-  const [players, setPlayers] = useState<Player[]>();
+const Chart = (props: {
+  games: GameResult[] | undefined;
+  players: Player[] | undefined;
+}) => {
+  const { players, games } = props;
+
   const [matchups, setMatchups] = useState<any>();
   const [ordering, setOrdering] = useState<number[]>([]);
-
-  useEffect(() => {
-    const dataset = 'nine'; // For testing directory
-
-    fetch(`./results/${dataset}/games.json`)
-      .then((response) => response.json())
-      .then((json) => {
-        let games = processGamesResponse(json);
-        setGames(games);
-        console.log(games);
-      });
-
-    fetch(`./results/${dataset}/players.json`)
-      .then((response) => response.json())
-      .then((json) => {
-        let players = processPlayerResponse(json);
-        setPlayers(players);
-        console.log(players);
-      });
-  }, []);
 
   useEffect(() => {
     if (players && games) {

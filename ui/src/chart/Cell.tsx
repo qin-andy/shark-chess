@@ -12,7 +12,7 @@ const Cell = (props: {
   const [showListTimer, setShowListTimer] = useState<NodeJS.Timer>();
 
   const handleClick = () => {
-    setShowList(true)
+    setShowList(!showList)
     // if (showListTimer) clearTimeout(showListTimer);
   }
 
@@ -22,7 +22,7 @@ const Cell = (props: {
 
   const handleMouseLeave = () => {
     // let timer = setTimeout(() => {
-      setShowList(false);
+      // setShowList(false);
     // }, 1000)
     // setShowListTimer(timer);
   }
@@ -49,7 +49,6 @@ const Cell = (props: {
   if (x === y) {
     return (
       <div style={style}>
-        <p>{x},{y}</p>
       </div>
     )
   }
