@@ -29,3 +29,13 @@ export interface Player {
   losses: number,
   draws: number,
 }
+
+
+export interface CellData {
+  x: number,
+  y: number,
+  players: Player[],
+  games: GameResult[],
+  highlighted: boolean,
+  open: boolean,
+}

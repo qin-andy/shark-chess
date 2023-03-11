@@ -1,24 +1,36 @@
-import React, { CSSProperties } from 'react';
+import React, { CSSProperties, useState } from 'react';
 import { Player } from "../types"
 
 const PlayerSummary = (props: {
   player: Player
 }) => {
   const { player } = props;
-
   const {wins, losses, draws} = player;
+
+  const [expanded, setExpanded] = useState(false);
   
   let [r, g, b] = generateRGB(wins, losses, draws); // TODO: refactor with Cell coloring
+
+  const handleClick = () => {
+    setExpanded(!expanded);
+  }
 
   let new_style: CSSProperties = {
     backgroundColor: `rgb(${r},${g},${b})`
   };
 
+  if (expanded) new_style = {...new_style, height: '200px'}
+
   return (
-    <div className='player-list-item' style={new_style}>
+    <div className='player-list-item' style={new_style} onClick={handleClick}>
       <p className='player-name'>{player.name}</p>
       <p className='player-elo'>{player.elo}</p>
       <p className='player-wld'>{wins}/{losses}/{draws}</p>
+      {expanded ? 
+        <div>
+          
+        </div> : null
+      }
     </div>
   )
 }

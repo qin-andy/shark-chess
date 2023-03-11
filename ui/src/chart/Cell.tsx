@@ -6,13 +6,20 @@ const Cell = (props: {
   x: number,
   y: number,
   players: Player[],
-  games: GameResult[]
+  games: GameResult[],
+  highlighted: boolean,
+  open: boolean,
+  openCell: Function,
 }) => {
+  let { x, y, games, players, highlighted, open, openCell} = props;
+
   const [showList, setShowList] = useState(false);
   const [showListTimer, setShowListTimer] = useState<NodeJS.Timer>();
 
   const handleClick = () => {
     setShowList(!showList)
+    let a = open ? openCell(-1, -1) : openCell(x, y); // hacky toggle
+    
     // if (showListTimer) clearTimeout(showListTimer);
   }
 
@@ -27,10 +34,9 @@ const Cell = (props: {
     // setShowListTimer(timer);
   }
 
-  let { x, y, games, players } = props;
   let style: CSSProperties = {
     border: ' 2px solid',
-    borderRadius: '15px',
+    borderRadius: open ? '100px' : '15px',
     position: 'relative',
     padding: '0px',
     margin: '0px', 
@@ -71,7 +77,7 @@ const Cell = (props: {
         onMouseEnter={handleHover}
         onMouseLeave={handleMouseLeave}
       >
-        {showList ? <CellList wp={wp} bp={bp} games={games} /> : null}
+        {open ? <CellList wp={wp} bp={bp} games={games} /> : null}
         <p/>
         <p style={playerDisplayStyle}>{wp}</p>
         <p style={playerDisplayStyle}>{bp}</p>

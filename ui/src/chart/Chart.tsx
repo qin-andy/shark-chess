@@ -1,28 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { GameResult, Player } from '../types';
+import { CellData, GameResult, Player } from '../types';
 import { aggregateMatchups, processGamesResponse, processPlayerResponse } from '../util/response';
 import Cell from './Cell';
 
 const Chart = (props: {
   games: GameResult[] | undefined;
   players: Player[] | undefined;
+  matchups: GameResult[][][] | undefined;
+  cellData: CellData[][] | undefined;
+  openCell: Function;
 }) => {
-  const { players, games } = props;
-
-  const [matchups, setMatchups] = useState<any>();
-  const [ordering, setOrdering] = useState<number[]>([]);
-
-  useEffect(() => {
-    if (players && games) {
-      const matchups = aggregateMatchups(games, players);
-      setMatchups(matchups);
-      let order = generateOrdering(players);
-      console.log(order);
-      setOrdering(order);
-    }
-  }, [games, players])
-
-
+  const { players, games, matchups, cellData, openCell } = props;
   const dimension = players == null ? 3 : players.length
   const chartStyle = {
     display: 'grid',
@@ -30,49 +18,40 @@ const Chart = (props: {
     gridTemplateColumns: `repeat(${dimension}, 100px)`,
   };
 
-  const buildCells = () => { // TODO : refactor into static method
-    if (players == null || matchups == null || ordering == null) return;
-
-    const dimension = players.length
-    const cells_y = []
-    for (let i = 0; i < dimension; i++) {
-      const cells_x = [];
-      let x = ordering[i]
-
-      for (let j = 0; j < dimension; j++) {
-        let y = ordering[j]
-        cells_x.push(
+  // consolidate cell data in components
+  const createCellComponents = (cellData?: CellData[][]) => {
+    if (!cellData) return [];
+    let components = []
+    for (let y = 0; y < cellData.length; y++) {
+      let y_row = [];
+      for (let x = 0; x < cellData.length; x++) {
+        let c = cellData[y][x];
+        let element = (
           <Cell 
-            key={x + ',' + y}
-            x={x} 
+            key={c.x + ',' + c.y}
+            x={x} // Note we're using the x, y coords from the iteration rather than CELL.X and CELL.Y.
             y={y}
-            players={players}
-            games={matchups[x][y]}
+            players={c.players}
+            games={c.games}
+            highlighted={c.highlighted}
+            open={c.open}
+            openCell={openCell}
           />
         )
+        y_row.push(element);
       }
-      cells_y.push(cells_x);
+      components.push(y_row);
     }
-    return cells_y;
+    return components;
   }
 
   return (
     <>
       <div style={chartStyle}>
-        {buildCells()}
+        {createCellComponents(cellData)}
       </div>
     </>
   )
-}
-
-// Generates an array of player ids in order of ELO
-const generateOrdering = (players: Player[]) => {
-  players.sort((a, b) => {
-    return a.elo - b.elo
-  });
-  return players.map((player) => {
-    return player.id
-  });
 }
 
 export default Chart;

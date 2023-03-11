@@ -9,13 +9,8 @@ const PlayerList = (props: {
 }) => {
   const { players, games } = props;
 
-  players?.sort((a, b) => { // TODO : refactor above with player ordering for the chart
-    return b.elo - a.elo
-  });
-
   return (
     <div className='player-list'>
-      {/* <h1>PLAYERS</h1> */}
       {players?.map((player, index) => {
         return <PlayerSummary player={player} />
       })}
