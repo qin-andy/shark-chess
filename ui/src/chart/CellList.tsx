@@ -1,6 +1,7 @@
-import { CSSProperties } from "react";
-import { GameResult } from "../types";
-import CellListItem from "./CellListItem";
+import { GameItemData, GameResult } from '../types';
+import CellListItem from './CellListItem';
+import './CellList.css';
+import { useEffect, useState } from 'react';
 
 const CellList = (props: {
   wp: string,
@@ -8,31 +9,68 @@ const CellList = (props: {
   games: GameResult[],
 }) => {
   let {wp, bp, games} = props;
+  const [gameItemData, setGameItemData] = useState<GameItemData[]>([]);
+  useEffect(() => {
+    setGameItemData(buildCellListItemData(games));
+  }, []);
 
-  let style: CSSProperties = {
-    position: 'absolute',
-    backgroundColor: 'whitesmoke', 
-    zIndex: 10,
-    top: '10px',
-    left: '80px',
-    width: '300px',
-    border: '3px solid',
-    overflowY: 'auto',
+  /** Builds initial UI data */
+  const buildCellListItemData = (games: GameResult[]) => {
+    let itemDataList = games.map((game) => {
+      let data: GameItemData = {
+        game: game,
+        highlighted: false,
+        open: false,
+      }
+      return data;
+    });
+    return itemDataList;
+  }
 
-    display: 'flex', 
-    flexDirection: 'column',
-  };
+  /** Callback to open a list item, prop drilled to children */
+  const openGameItem = (index: number) => {
+    let newGameItemData = gameItemData.map((itemData, idx) => {
+      if (idx === index) {
+        itemData.open = true;
+      } else {
+        itemData.open = false;
+      }
+      return itemData;
+    });
+    setGameItemData(newGameItemData);
+  }
+
+  /** Builds components from state data */
+  const buildCellListItemComponents = (data: GameItemData[]) => {
+    let items: JSX.Element[] = [];
+    data.forEach((itemData, idx) => {
+      let item = (
+        <CellListItem
+          key={idx}
+          game={itemData.game}
+          open={itemData.open}
+          highlighted={itemData.highlighted}
+          openGameItem={openGameItem}
+          index={idx}
+        />
+      )
+      items.push(item);
+    });
+    return items;
+  }
+
+  // Build components
+  let items = buildCellListItemComponents(gameItemData);
 
   return (
-    <div
-      style={style}
-    >
+    <div className="cell-list">
       <p>{wp} vs {bp}</p>
-      {games.map((game, idx) => {
-        return <CellListItem key={idx} game={game} />
-      })}
+      {items}
     </div>
   )
 }
+
+
+
 
 export default CellList;

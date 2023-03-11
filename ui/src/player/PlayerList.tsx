@@ -12,7 +12,7 @@ const PlayerList = (props: {
   return (
     <div className='player-list'>
       {players?.map((player, index) => {
-        return <PlayerSummary player={player} />
+        return <PlayerSummary player={player} key={index} />
       })}
     </div>
   )

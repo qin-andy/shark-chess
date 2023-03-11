@@ -16,7 +16,6 @@ export interface GameResult {
   endingFEN: string,
 }
 
-
 /**
  * Mapping of player retrieved from DB
  * Stores info for a player's overall tourney performance
@@ -30,12 +29,19 @@ export interface Player {
   draws: number,
 }
 
-
+/** Wrapper for tourney data used by Cell components including UI state */
 export interface CellData {
   x: number,
   y: number,
   players: Player[],
   games: GameResult[],
+  highlighted: boolean,
+  open: boolean,
+}
+
+/** Wrapper for game item used by game list components */
+export interface GameItemData {
+  game: GameResult,
   highlighted: boolean,
   open: boolean,
 }

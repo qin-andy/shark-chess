@@ -1,0 +1,35 @@
+.cell-list {
+  position: absolute;
+  background-color: whitesmoke;
+  z-index: 10;
+  top: 10px;
+  left: 80px;
+  width: 300px;
+  border: 3px solid;
+  overflow-y: auto;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.cell-list-item {
+  border: solid 1px black;
+
+  padding: 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+
+.game-preview {
+  position: relative;
+  background-color: whitesmoke;
+  z-index: 20;
+  top: 0px;
+  left: 0px;
+  width: 250px;
+  height: 250px;
+  border: 3px solid black;
+  margin: 10px;
+}
