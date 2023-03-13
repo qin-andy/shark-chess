@@ -1,6 +1,7 @@
 import React, { CSSProperties, useState } from 'react';
 import { GameResult, Player } from '../types';
 import CellList from './CellList';
+import './Cell.css';
 
 const Cell = (props: {
   x: number,
@@ -20,27 +21,16 @@ const Cell = (props: {
     let a = open ? openCell(-1, -1) : openCell(x, y); // hacky toggle
   }
 
-  let style: CSSProperties = {
-    border: ' 2px solid',
-    borderRadius: open ? '100px' : '15px',
-    position: 'relative',
-    padding: '0px',
-    margin: '0px', 
 
-    fontSize: '14px',
-    textAlign: 'center',
-  };
   
   let playerDisplayStyle: CSSProperties = {
-    // border: '3px solid',
-    // borderRadius: '15px',
     margin: '2px',
   }
 
   // Mirror match case, show nothing
   if (x === y) {
     return (
-      <div style={style}>
+      <div className='cell'>
       </div>
     )
   }
@@ -50,14 +40,20 @@ const Cell = (props: {
 
   let [w, l, d] = summarizeMatch(games);
   let [r, g, b] = generateRGB(w, l, d);
+  if (open) {
+    r -= 70;
+    g -= 70;
+    b -= 70;
+  }
 
-  let new_style: CSSProperties = {...style, 
+  let new_style: CSSProperties = {
     backgroundColor: `rgb(${r},${g},${b})`
   };
 
   return (
     <>
       <div 
+        className='cell'
         style={new_style}
       >
         {open ? <CellList wp={wp} bp={bp} games={games} /> : null}

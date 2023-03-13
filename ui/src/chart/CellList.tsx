@@ -1,6 +1,5 @@
 import { GameItemData, GameResult } from '../types';
 import CellListItem from './CellListItem';
-import './CellList.css';
 import { useEffect, useState } from 'react';
 
 const CellList = (props: {
@@ -64,8 +63,9 @@ const CellList = (props: {
 
   return (
     <div className="cell-list">
-      <p>{wp} vs {bp}</p>
+      <p className='cell-list-heading'>{wp} vs {bp}</p>
       {items}
+      <p>Back to Top</p>
     </div>
   )
 }

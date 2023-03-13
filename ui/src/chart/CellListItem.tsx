@@ -15,7 +15,7 @@ const CellListItem = (props: {
   const [clicked, setClicked] = useState(false);
 
   const onMouseEnter = () => { 
-    openGameItem(index)
+    // openGameItem(index)
   }
 
   const onMouseLeave = () => {
@@ -24,17 +24,20 @@ const CellListItem = (props: {
   }
 
   const onMouseClick = () => {
+    let a = clicked ? openGameItem(-1) : openGameItem(index); 
     setClicked(!clicked);
-    openGameItem(index);
-    
   }
 
   // Coloring
-  let bgColor = 'white';
-  if (game.winningColor === 'black') bgColor = 'gray';
-  else if (game.winningColor === 'white') bgColor = 'silver';
+  let bgColor = 'silver'
+  let textColor = 'black';
+  if (game.winningColor === 'black') {
+    bgColor = '#222222';
+    textColor = 'white'
+  }
+  else if (game.winningColor === 'white') bgColor = '#EEEEEEE';
 
-  let style: CSSProperties = { backgroundColor: bgColor };
+  let style: CSSProperties = { backgroundColor: bgColor, color: textColor };
 
   return (
     <div 
@@ -44,7 +47,12 @@ const CellListItem = (props: {
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      {game.winningPlayer} wins in {game.moves} moves
+      
+      {
+        game.winningPlayer === 'None' ? 
+          <><b>Draw</b> {game.moves} moves</>
+          : <><b>{game.winningPlayer}</b> {game.moves} moves</>
+      }
       {open ? <GamePreview game={game} /> : null}
     </div>
   )
