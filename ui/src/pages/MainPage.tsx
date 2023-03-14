@@ -29,6 +29,15 @@ const MainPage = () => {
         players?.sort((a, b) => {
           return b.elo - a.elo
         });
+
+        // For testing ordering
+        // let array = players;
+        // for (let i = array.length - 1; i > 0; i--) {
+        //   const j = Math.floor(Math.random() * (i + 1));
+        //   [array[i], array[j]] = [array[j], array[i]];
+        // }
+        // players = array;
+
         setPlayerData(players);
         console.log(players);
       });
@@ -98,7 +107,5 @@ const populateCellData = (games?: GameResult[], players?: Player[], matchups?: G
   }
   return cells_y;
 }
-
-
 
 export default MainPage;

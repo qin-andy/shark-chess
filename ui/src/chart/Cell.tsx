@@ -15,14 +15,22 @@ const Cell = (props: {
   let { x, y, games, players, highlighted, open, openCell} = props;
 
   const [showList, setShowList] = useState(false);
+  const [hover, setHover] = useState(false);
 
   const handleClick = () => {
     setShowList(!showList)
     let a = open ? openCell(-1, -1) : openCell(x, y); // hacky toggle
   }
 
+  const handleHover = () => {
+    setHover(true);
+  }
 
-  
+  const handleUnhover = () => {
+    setHover(false);
+  }
+
+
   let playerDisplayStyle: CSSProperties = {
     margin: '2px',
   }
@@ -46,6 +54,12 @@ const Cell = (props: {
     b -= 70;
   }
 
+  if (hover) {
+    r -= 30;
+    g -= 30;
+    b -= 30;
+  }
+
   let new_style: CSSProperties = {
     backgroundColor: `rgb(${r},${g},${b})`
   };
@@ -59,6 +73,8 @@ const Cell = (props: {
         {open ? <CellList wp={wp} bp={bp} games={games} /> : null}
         <div
           onClick={handleClick}
+          onMouseEnter={handleHover}
+          onMouseLeave={handleUnhover}
         >
           <p/>
           <p style={playerDisplayStyle}>{wp}</p>

@@ -1,0 +1,29 @@
+.chart-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-row {
+  display: flex;
+  flex-direction: row;
+}
+
+/* the label row is the first ROW. these label the COLUMNS. */
+.label-row-item { 
+  width: 94px;
+  height: 94px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* the label column is the first COLUMN of labels. these label the ROWS. */
+.label-column-item {
+  width: 94px;
+  height: 94px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

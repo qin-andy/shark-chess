@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { CellData, GameResult, Player } from '../types';
-import { aggregateMatchups, processGamesResponse, processPlayerResponse } from '../util/response';
 import Cell from './Cell';
+
+import './Chart.css';
 
 const Chart = (props: {
   games: GameResult[] | undefined;
@@ -12,19 +13,45 @@ const Chart = (props: {
 }) => {
   const { players, games, matchups, cellData, openCell } = props;
   const dimension = players == null ? 3 : players.length
-  const chartStyle = {
-    display: 'grid',
-    gridTemplateRows: `repeat(${dimension}, 100px)`,
-    gridTemplateColumns: `repeat(${dimension}, 100px)`,
-  };
 
-  // consolidate cell data in components
+  // consolidate cell data in components. Also builds chart labels
   const createCellComponents = (cellData?: CellData[][]) => {
-    if (!cellData) return [];
+    if (!cellData || !players) return [];
     let components = []
+    
+    // Also need to build labels. First "row" of components is all labels.
+    let label_row = [(<div className='label-row-item'></div>)]; // first label row
+    console.log(cellData)
+
+    // Reverse out of play (not in place)
+    let reverse_players = players.map((player, index) => {return players[players.length-1-index]});
+    for (let i = 1; i < dimension + 1; i++) {
+      let label = (
+        <div className='label-row-item'>
+          {reverse_players[i-1].name}
+        </div>
+      );
+      label_row.push(label);
+    }
+    components.push(
+      <div className='chart-row'>
+        {label_row}
+      </div>
+    );
+ 
     for (let y = 0; y < cellData.length; y++) {
       let y_row = [];
       for (let x = 0; x < cellData.length; x++) {
+        // first element of every row has to be a label
+        if (x === 0) {
+          let label = (
+          <div className='label-column-item'>
+            {reverse_players[y].name}
+          </div>
+        );
+        y_row.push(label);
+       }
+
         let c = cellData[y][x];
         let element = (
           <Cell 
@@ -40,14 +67,18 @@ const Chart = (props: {
         )
         y_row.push(element);
       }
-      components.push(y_row);
+      components.push(
+        <div className='chart-row'>
+          {y_row}
+        </div>
+      );
     }
     return components;
   }
 
   return (
     <>
-      <div style={chartStyle}>
+      <div className='chart-container'>
         {createCellComponents(cellData)}
       </div>
     </>
