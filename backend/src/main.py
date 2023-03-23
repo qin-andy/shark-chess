@@ -52,9 +52,26 @@ def player_game_test():
   engine.close()
 
 def import_test():
-  tourney = TourneyManager(10)
+
+
+
+  bot_ar = AlwaysRandomBot()
+  stockfish_path = '../stockfish/stockfish-ubuntu-20.04-x86-64'
+  dirname = os.path.dirname(__file__)
+  filename = os.path.join(dirname, stockfish_path)
+  engine = chess.engine.SimpleEngine.popen_uci(filename)
+  base_limit = chess.engine.Limit(time=0.1, depth=5)
+
+  bot_sf = Stockfish100Bot(engine, base_limit)
+  bot_sf_5 = WaterBot(bot_sf, bot_ar, 0.05)
+  player_sf_5 = Player(bot_sf_5, "ADDED")
+
+  tourney = TourneyManager(3)
   tourney.import_game_results()
   tourney.import_player_results()
+
+  tourney.continue_tourney(player_sf_5)
+
   tourney.export_game_data()
   tourney.export_player_data()
 

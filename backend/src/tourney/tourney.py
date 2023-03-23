@@ -129,6 +129,34 @@ class TourneyManager:
     print('Total time for tournament: ' + str(total_time))
     self.game_results = grs
     return grs
+  
+  # Adds a single new player to the tourney and runs games with that player
+  def continue_tourney(self, new_player: Player):
+    match_count = 0
+    match_total = len(self.players)
+    new_player.id = len(self.players)  # assign new player the appropriate id
+
+    grs = self.game_results
+    start_time = time.time()
+
+    # new player as white
+    # note the loose convention of match orders being all white then all black plays is brokn here
+    for old_player in self.players:
+      match_count += 1
+
+      print('Match ' + str(match_count) + '/' + str(match_total))
+      # TODO : should validate previous results and new match length are same.
+      grs += self.play_match(new_player, old_player, self.match_length, False)
+      # Note : playing continued games out of order here.
+      grs += self.play_match(old_player, new_player, self.match_length, False)
+
+    total_time = time.time() - start_time
+
+    self.players.append(new_player) # have this at the end, bc we iterate through players above
+
+    print('Total time for continution: ' + str(total_time))
+    
+
 
   # Exports stored game data as JSON
   def export_game_data(self) -> str:
@@ -176,6 +204,7 @@ class TourneyManager:
     data = df.to_dict('records')
 
     json_data = json.dumps(data, indent=2)
+    # TODO : refactor this into a constant, the export name
     with open('games.json', 'w') as file:
       file.write(json_data,)
 
@@ -211,6 +240,8 @@ class TourneyManager:
     df2 = pd.DataFrame(player_data)
     data = df2.to_dict('records')
     json_data = json.dumps(data, indent=2)
+
+    # TODO : refactor this into a constant, the export name
     with open('players.json', 'w') as file:
       file.write(str(json_data),)
 
@@ -334,5 +365,3 @@ class TourneyManager:
     #   print(player.wins)
 
     # importing game results
-
-
