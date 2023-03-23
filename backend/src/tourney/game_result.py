@@ -5,6 +5,7 @@ from tourney.player import Player
 
 class GameResult:
   def __init__(self):
+    self.game_number = 0
     self.white_player: str = None
     self.black_player: str = None
     self.winning_player = None

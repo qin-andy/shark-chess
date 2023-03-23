@@ -1,5 +1,6 @@
 
 from bots.bots import ChessBot
+import time
 
 
 class Player:
@@ -12,8 +13,16 @@ class Player:
     self.losses: int = 0
     self.draws: int = 0
 
+    # Game to game stats
+    self.total_thinking_time: float = 0
+    self.total_moves: int = 0
+
   def move(self, board):
-    return self.bot.make_move(board)
+    start_time = time.time()
+    move = self.bot.make_move(board)
+    self.total_thinking_time += time.time() - start_time
+    self.total_moves += 1
+    return move
 
   def __str__(self):
     return self.friendly_name
