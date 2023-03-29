@@ -47,14 +47,11 @@ def player_game_test():
   # play_match(player_pacifist, player_sk, 5, True)
   tourney = TourneyManager(3)
   tourney.play_tournament(players_1)
-  tourney.export_game_data()
-  tourney.export_player_data()
+  tourney.export_game_data('new_dict')
+  tourney.export_player_data('new_dict')
   engine.close()
 
 def import_test():
-
-
-
   bot_ar = AlwaysRandomBot()
   stockfish_path = '../stockfish/stockfish-ubuntu-20.04-x86-64'
   dirname = os.path.dirname(__file__)
@@ -64,16 +61,16 @@ def import_test():
 
   bot_sf = Stockfish100Bot(engine, base_limit)
   bot_sf_5 = WaterBot(bot_sf, bot_ar, 0.05)
-  player_sf_5 = Player(bot_sf_5, "ADDED")
+  # player_sf_5 = Player(bot_sf_5, "ADDED")
 
   tourney = TourneyManager(3)
-  tourney.import_game_results()
-  tourney.import_player_results()
+  tourney.import_game_results('new_dict_games.json')
+  tourney.import_player_results('new_dict_players.json')
 
-  tourney.continue_tourney(player_sf_5)
+  # tourney.continue_tourney(player_sf_5)
 
-  tourney.export_game_data()
-  tourney.export_player_data()
+  tourney.export_game_data('newnew_dict')
+  tourney.export_player_data('newnew_dict')
 
 
 

@@ -20,7 +20,7 @@ class GameResult:
     self.matchup_id: str = None
     self.ending_fen: str = None
 
-  def update(self, wp: Player, bp: Player,
+  def from_chess(self, wp: Player, bp: Player,
              board: chess.Board, game: chess.pgn.Game):
     # Basic Naming
     self.white_player = str(wp)
@@ -72,6 +72,49 @@ class GameResult:
           self.winning_player = str(bp)
           self.winning_color = 'black'
           self.r = 0
+    return self
+  
+  # export gameresult as a dictionary
+  def to_dict(self):
+    # game_data = {
+    #   'Matchup ID': matchup_ids,
+    #   'Winning Player': winning_players,
+    #   'Winning Color': winning_colors,
+    #   'End Reason': reasons,
+    #   'Moves': moves,
+    #   'Time': times,
+    #   'PGN': pgns,
+    #   'White': whites,
+    #   'Black': blacks,
+    #   'Ending FEN': ending_fens
+    # }
+
+    game_dict = {}
+    game_dict['Matchup ID']= self.matchup_id
+    game_dict['Winning Player'] = self.winning_player
+    game_dict['Winning Color'] = self.winning_color
+    game_dict['End Reason'] = self.end_reason
+    game_dict['Moves'] = self.moves
+    game_dict['Time'] = self.time
+    game_dict['PGN'] = self.pgn
+    game_dict['White'] = self.white_player
+    game_dict['Black'] = self.black_player 
+    game_dict['Ending FEN'] = self.ending_fen    
+    return game_dict
+  
+  # Update fields based on game result dictionary
+  def from_dict(self, game_dict):
+    # gr.game_number = game_dict[''] # TODO : figure out what is and isnt being serialized
+    self.white_player = game_dict['White']
+    self.black_player = game_dict['Black']
+    self.winning_player = game_dict['Winning Player']
+    self.winning_color = game_dict['Winning Color']
+    self.moves = game_dict['Moves']
+    self.time = game_dict['Time']
+    self.pgn = game_dict['PGN']
+    self.end_reason = game_dict['End Reason']
+    self.matchup_id = game_dict['Matchup ID']
+    self.ending_fen = game_dict['Ending FEN']
     return self
 
   def __str__(self):

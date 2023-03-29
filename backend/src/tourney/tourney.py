@@ -4,7 +4,6 @@ import time
 import chess
 import chess.pgn
 import chess.engine
-import pandas as pd
 import os
 
 from bots.bots import *
@@ -46,7 +45,7 @@ class TourneyManager:
       turns += 1
     game.end()
     game_result = GameResult()
-    game_result.update(wp, bp, board, game)
+    game_result.from_chess(wp, bp, board, game)
 
     # set ID. setting it externally here cuz its tourney_level, even if its stored on GR level.
     game_result.game_number = self.game_number
@@ -155,94 +154,31 @@ class TourneyManager:
     self.players.append(new_player) # have this at the end, bc we iterate through players above
 
     print('Total time for continution: ' + str(total_time))
-    
-
+  
 
   # Exports stored game data as JSON
-  def export_game_data(self) -> str:
-    winning_players = []
-    winning_colors = []
-    reasons = []
-    moves = []
-    times = []
-    pgns = []
-    whites = []
-    blacks = []
-    matchup_ids = []
-    ending_fens = []
-
-    # Unzip array of game objects into arrays
+  def export_game_data(self, file_name) -> str:
+    data = []
     for gr in self.game_results:
-      winning_players.append(gr.winning_player)
-      winning_colors.append(gr.winning_color)
-      reasons.append(gr.end_reason)
-      moves.append(gr.moves)
-      times.append(gr.time)
-      pgns.append(gr.pgn)
-      whites.append(gr.white_player)
-      blacks.append(gr.black_player)
-      matchup_ids.append(gr.matchup_id)
-      ending_fens.append(gr.ending_fen)
-
-    # Settingup data in dict
-    game_data = {
-      'Matchup ID': matchup_ids,
-      'Winning Player': winning_players,
-      'Winning Color': winning_colors,
-      'End Reason': reasons,
-      'Moves': moves,
-      'Time': times,
-      'PGN': pgns,
-      'White': whites,
-      'Black': blacks,
-      'Ending FEN': ending_fens
-    }
-
-    df = pd.DataFrame(game_data)
-    cwd = os.getcwd()
-    print(cwd)
-    data = df.to_dict('records')
+      data.append(gr.to_dict())
 
     json_data = json.dumps(data, indent=2)
     # TODO : refactor this into a constant, the export name
-    with open('games.json', 'w') as file:
+    with open(file_name + '_games.json', 'w') as file:
       file.write(json_data,)
 
     # files.download('output.csv')
 
   # Exports stored player data as jsonz`z`
-  def export_player_data(self):
-    # player data
-    names = []
-    ids = []
-    elos = []
-    wins = []
-    losses = []
-    draws = []
-
+  def export_player_data(self, file_name):
+    data = []
     for player in self.players:
-      names.append(player.friendly_name)
-      ids.append(player.id)
-      elos.append(player.elo)
-      wins.append(player.wins)
-      losses.append(player.losses)
-      draws.append(player.draws)
-
-    player_data = {
-      'Name': names,
-      'ID': ids,
-      'Elo': elos,
-      'Wins': wins,
-      'Losses': losses,
-      'Draws': draws,
-    }
-
-    df2 = pd.DataFrame(player_data)
-    data = df2.to_dict('records')
+      data.append(player.to_dict())
+      
     json_data = json.dumps(data, indent=2)
 
     # TODO : refactor this into a constant, the export name
-    with open('players.json', 'w') as file:
+    with open(file_name + '_players.json', 'w') as file:
       file.write(str(json_data),)
 
   # Generates a labelled dictionary of bots
@@ -282,64 +218,31 @@ class TourneyManager:
     return bot_dict
 
 
-  def import_game_results(self):
+  def import_game_results(self, file_name):
     game_results = []
 
-    # game_data = {
-    #   'Matchup ID': matchup_ids,
-    #   'Winning Player': winning_players,
-    #   'Winning Color': winning_colors,
-    #   'End Reason': reasons,
-    #   'Moves': moves,
-    #   'Time': times,
-    #   'PGN': pgns,
-    #   'White': whites,
-    #   'Black': blacks,
-    #   'Ending FEN': ending_fens
-    # }
-
     # import game results
-    path = '../i_games.json'  # TODO : refactor
+    # parameter requires file extension.
+    path = '../../' + file_name  # TODO : refactor
     dirname = os.path.dirname(__file__)
     filename = os.path.join(dirname, path)
     g_file = open(filename)
     g_jdata = json.loads(g_file.read())
     for game_dict in g_jdata:
       gr = GameResult()
-      # gr.game_number = game_dict['']
-      gr.white_player = game_dict['White']
-      gr.black_player = game_dict['Black']
-      gr.winning_player = game_dict['Winning Player']
-      gr.winning_color = game_dict['Winning Color']
-      # gr.r = game_dict['']  # numerical value representing result. 1=w, 0.5=d, 0=b
-      gr.moves = game_dict['Moves']
-      gr.time = game_dict['Time']
-      gr.pgn = game_dict['PGN']
-      gr.end_reason = game_dict['End Reason']
-      # gr.pc_game = game_dict['']
-      # gr.pc_board = game_dict['']
-      gr.matchup_id = game_dict['Matchup ID']
-      gr.ending_fen = game_dict['Ending FEN']
+      gr.from_dict(game_dict)
       game_results.append(gr)
     self.game_results = game_results
 
   
-  def import_player_results(self):
+  def import_player_results(self, file_name):
     # Import json file
-    path = '../i_players.json' # TODO : refactor
+    # parameter requires file extension.
+    path = '../../' + file_name # TODO : refactor
     dirname = os.path.dirname(__file__)
     filename = os.path.join(dirname, path)
     p_file = open(filename)
     p_jdata = json.loads(p_file.read())
-
-    # player_data = {
-    #   'Name': names,
-    #   'ID': ids,
-    #   'Elo': elos,
-    #   'Wins': wins,
-    #   'Losses': losses,
-    #   'Draws': draws,
-    # }
 
     # Convert list of dicts into list of player objects
     players = []
@@ -348,20 +251,7 @@ class TourneyManager:
       name = player_dict['Name']
       bot = bot_dict[name]
       player = Player(bot, name)
-
-      player.id = player_dict['ID']
-      player.elo = int(player_dict['Elo'])
-      player.wins = int(player_dict['Wins'])
-      player.losses = int(player_dict['Losses'])
-      player.draws = int(player_dict['Draws'])
-
+      player.from_dict(player_dict)
       players.append(player)
 
     self.players = players
-
-    # for debugging
-    # for player in players:
-    #   print(player.friendly_name)
-    #   print(player.wins)
-
-    # importing game results
