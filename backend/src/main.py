@@ -5,6 +5,8 @@ import chess
 import chess.engine
 
 
+ENGINE_PATH = '../stockfish/stockfish-ubuntu-20.04-x86-64'
+
 def player_game_test():
   bot_ar = AlwaysRandomBot()
   bot_sk = SuicideKingBot()
@@ -15,7 +17,7 @@ def player_game_test():
 
   # Configuring path
   # Rememeber to install stockfish in the project root and chmod 755 (?) /to allow permissions
-  stockfish_path = '../stockfish/stockfish-ubuntu-20.04-x86-64'
+  stockfish_path = ENGINE_PATH
   dirname = os.path.dirname(__file__)
   filename = os.path.join(dirname, stockfish_path)
   engine = chess.engine.SimpleEngine.popen_uci(filename)
@@ -53,7 +55,7 @@ def player_game_test():
 
 def import_test():
   bot_ar = AlwaysRandomBot()
-  stockfish_path = '../stockfish/stockfish-ubuntu-20.04-x86-64'
+  stockfish_path = ENGINE_PATH
   dirname = os.path.dirname(__file__)
   filename = os.path.join(dirname, stockfish_path)
   engine = chess.engine.SimpleEngine.popen_uci(filename)
@@ -61,16 +63,19 @@ def import_test():
 
   bot_sf = Stockfish100Bot(engine, base_limit)
   bot_sf_5 = WaterBot(bot_sf, bot_ar, 0.05)
-  # player_sf_5 = Player(bot_sf_5, "ADDED")
+  player_sf_5 = Player(bot_sf_5, "ADDED")
 
   tourney = TourneyManager(3)
+  tourney.engine = engine
   tourney.import_game_results('new_dict_games.json')
   tourney.import_player_results('new_dict_players.json')
 
-  # tourney.continue_tourney(player_sf_5)
+  tourney.continue_tourney(player_sf_5)
 
   tourney.export_game_data('newnew_dict')
   tourney.export_player_data('newnew_dict')
+  engine.close()
+
 
 
 

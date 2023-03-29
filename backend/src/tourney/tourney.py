@@ -23,6 +23,7 @@ class TourneyManager:
     self.players: list[Player] = []
 
     self.game_number = 0 # increment after a game result is assigend this. pseudo id
+    self.engine = None # TODO : used for tourney continuation in create_bot_dict. 
 
   # Play a single game between players
   def play_game(self, wp: Player, bp: Player, turn_limit: int) -> GameResult:
@@ -192,17 +193,22 @@ class TourneyManager:
     bot_pacifist = PacifistBot()
     bot_berserk = BerserkBot()
 
-    stockfish_path = '../../stockfish/stockfish-ubuntu-20.04-x86-64' # TODO : refactor
-    dirname = os.path.dirname(__file__)
-    filename = os.path.join(dirname, stockfish_path)
-    engine = chess.engine.SimpleEngine.popen_uci(filename) # TODO : should close this after continuing tourney
-    base_limit = chess.engine.Limit(time=0.1, depth=5)
 
-    bot_sf = Stockfish100Bot(engine, base_limit)
+    # Stockfish bots
+    # for testing, you can manually set self.engine to give custom engine. otherwise, creates one.
+    if self.engine == None:
+      stockfish_path = '../../stockfish/stockfish-ubuntu-20.04-x86-64' # TODO : refactor
+      dirname = os.path.dirname(__file__)
+      filename = os.path.join(dirname, stockfish_path)
+      engine = chess.engine.SimpleEngine.popen_uci(filename) # TODO : should close this after continuing tourney
+      self.engine = engine
+
+    base_limit = chess.engine.Limit(time=0.1, depth=5)
+    bot_sf = Stockfish100Bot(self.engine, base_limit)
     bot_sf_5 = WaterBot(bot_sf, bot_ar, 0.05)
     bot_sf_10 = WaterBot(bot_sf, bot_ar, 0.1)
     bot_sf_20 = WaterBot(bot_sf, bot_ar, 0.2)
-    bot_panic = PanicFishBot(engine, base_limit)
+    bot_panic = PanicFishBot(self.engine, base_limit)
 
     bot_dict["Random"] = bot_ar
     bot_dict["Suicide King"] = bot_sk
