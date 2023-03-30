@@ -50,10 +50,10 @@ def run_tourney_export_json_test():
 
   # gr = play_game(player_sk, player_pacifist, 300)
   # play_match(player_pacifist, player_sk, 5, True)
-  tourney = Tourney('Change', 15)
+  tourney = Tourney('Continuer', 15)
   tourney.play_tournament(players_2)
-  tourney.export_games_json('change')
-  tourney.export_players_json('change')
+  tourney.export_games_json('continue')
+  tourney.export_players_json('continue')
   engine.close()
 
 def continue_tourney_json_test():
@@ -99,90 +99,16 @@ def dao_read_tourney_test():
   dao_tourney.export_players_json('dao3_retrieved')
 
 
-# Tourney Steps:
-  # 1. Run tourney exported jsons
-  # 2. import json to reconstruct tourney, dump into mongodb
-  # 3. Get tourney frommongodb, reconstruct tourney, continue tourney, export as json, put back into mongodb
-
-# Constants for tourney-ing
-MATCH_LENGTH = 50
-TOURNEY_NAME = 'Continuer'
-TOURNEY_PREFIX = 'continuer'
-UI_PATH = '../ui/public/results/continuer/'
-  
-  
-# 1. Run tourney exported jsons
-def dao_cont_1():
-  bot_ar = AlwaysRandomBot()
-  bot_sk = SuicideKingBot()
-
-  player_ar = Player(bot_ar, "Random")
-  player_sk = Player(bot_sk, "Suicide King")
-  players_2 = [player_sk, player_ar]
-
-  tourney = Tourney(TOURNEY_NAME, MATCH_LENGTH)
-  tourney.play_tournament(players_2)
-  tourney.export_games_json(TOURNEY_PREFIX)
-  tourney.export_players_json(TOURNEY_PREFIX)
-
-# 2. import json to reconstruct tourney, dump into mongodb
-def dao_cont_2():
-  tourney = Tourney(TOURNEY_NAME, MATCH_LENGTH)
-  tourney.import_games_json(TOURNEY_PREFIX + '_games.json')
-  tourney.import_players_json(TOURNEY_PREFIX + '_players.json')
-  tourney.engine.close()
-
+def dao_continue_tourney_test():
   dao = RecordsDao()
-  dao.store_tourney(tourney)
 
-
-# 3. Get tourney frommongodb, reconstruct tourney, continue tourney, export as json, put back into mongodb
-def dao_cont_3():
-  dao = RecordsDao()
-  dao_tourney = dao.get_tourney(TOURNEY_NAME)
-
-
-  # For reference:
-    # bot_dict["Random"] = bot_ar
-    # bot_dict["Suicide King"] = bot_sk
-    # bot_dict["Pacifist"] = bot_pacifist
-    # bot_dict["Berserk"] = bot_berserk
-    # bot_dict["Panicfish"] = bot_panic
-    # bot_dict["Stockfish 100"] = bot_sf
-    # bot_dict["Stockfish 5"] = bot_sf_5
-    # bot_dict["Stockfish 10"] = bot_sf_10
-    # bot_dict["Stockfish 20"] = bot_sf_20
-  
-  bot_dict = dao_tourney.get_bot_dict()
-  new_player_name = 'Pacifist'
-  new_player = Player(bot_dict[new_player_name], new_player_name)
-
-  dao_tourney.continue_tourney(new_player)
-
-  dao.store_tourney(dao_tourney) # wasteful, rewrites all games. in the future, use limited write.
-  
-  dao_tourney.engine.close()
-  dao_tourney.export_games_json(UI_PATH + '/' + TOURNEY_PREFIX)
-  dao_tourney.export_players_json(UI_PATH + '/' + TOURNEY_PREFIX)
-
-# resets all dao_cont things
-def dao_cont_cleanup():
-  dao = RecordsDao()
-  tourney = Tourney(TOURNEY_NAME, MATCH_LENGTH)
-  dao.store_tourney(tourney)
 
 
 if __name__ == '__main__':
-  # run_tourney_export_json_test()
+  run_tourney_export_json_test()
   # continue_tourney_json_test()
   # dao_put_tourney_test()
   # dao_read_tourney_test()
   # play_tourney()
-
-  # dao_cont_1()
-  # dao_cont_2()
-  dao_cont_3()
-  # dao_cont_cleanup()
-
 
 

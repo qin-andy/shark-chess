@@ -12,16 +12,18 @@ from tourney.game_result import GameResult
 from tourney.player import Player
 
 
-class TourneyManager:
+class Tourney:
   # default constructor
-  def __init__(self, match_length: int):
+  def __init__(self, friendly_name, match_length: int):
     # Tourney settings
     self.match_length = match_length
     self.elo_k = 32 # controls Elo gain/loss
 
     self.game_results: list[GameResult] = []
     self.players: list[Player] = []
+    self.friendly_name = friendly_name
 
+    self.bot_dict = None
     self.game_number = 0 # increment after a game result is assigend this. pseudo id
     self.engine = None # TODO : used for tourney continuation in create_bot_dict. 
 
@@ -131,12 +133,14 @@ class TourneyManager:
     return grs
   
   # Adds a single new player to the tourney and runs games with that player
+  # Returns the new player and new game results
   def continue_tourney(self, new_player: Player):
     match_count = 0
     match_total = len(self.players)
     new_player.id = len(self.players)  # assign new player the appropriate id
 
     grs = self.game_results
+    new_grs = [] # used to calculate the diffs
     start_time = time.time()
 
     # new player as white
@@ -146,19 +150,21 @@ class TourneyManager:
 
       print('Match ' + str(match_count) + '/' + str(match_total))
       # TODO : should validate previous results and new match length are same.
-      grs += self.play_match(new_player, old_player, self.match_length, False)
+      new_grs += self.play_match(new_player, old_player, self.match_length, False)
       # Note : playing continued games out of order here.
-      grs += self.play_match(old_player, new_player, self.match_length, False)
+      new_grs += self.play_match(old_player, new_player, self.match_length, False)
 
+    grs += new_grs
     total_time = time.time() - start_time
 
     self.players.append(new_player) # have this at the end, bc we iterate through players above
 
     print('Total time for continution: ' + str(total_time))
+    return new_player, new_grs # used in dao
   
 
   # Exports stored game data as JSON
-  def export_game_data(self, file_name) -> str:
+  def export_games_json(self, file_name) -> str:
     data = []
     for gr in self.game_results:
       data.append(gr.to_dict())
@@ -171,7 +177,7 @@ class TourneyManager:
     # files.download('output.csv')
 
   # Exports stored player data as jsonz`z`
-  def export_player_data(self, file_name):
+  def export_players_json(self, file_name):
     data = []
     for player in self.players:
       data.append(player.to_dict())
@@ -180,11 +186,36 @@ class TourneyManager:
 
     # TODO : refactor this into a constant, the export name
     with open(file_name + '_players.json', 'w') as file:
-      file.write(str(json_data),)
+      file.write(json_data,)
+
+  # Exports game and player data in a single json
+  def export_tourney(self, file_name):
+    player_data = []
+    for player in self.players:
+      player_data.append(player.to_dict())
+
+    game_data = []
+    for gr in self.game_results:
+      game_data.append(gr.to_dict())
+    
+    tourney_data = {
+      'Name': self.friendly_name,
+      'Match Length': self.match_length,
+      'Players': player_data,
+      'Games': game_data
+    }
+
+    # TODO : refactor this into a constant, the export name
+    with open(file_name + '_tourney.json', 'w') as file:
+      file.write(tourney_data,)
+
 
   # Generates a labelled dictionary of bots
   # Used for importing tourneys from JSON
-  def create_bot_dict(self) -> dict:
+  # TODO : this should be refactored into constants of some sort
+  def get_bot_dict(self) -> dict:
+    if (self.bot_dict != None):
+      return self.bot_dict
     bot_dict = {}
 
     # Initializing vanilla bots
@@ -221,10 +252,10 @@ class TourneyManager:
     bot_dict["Stockfish 20"] = bot_sf_20
 
     # TODO : handle engine return for closing
+    self.bot_dict = bot_dict
     return bot_dict
 
-
-  def import_game_results(self, file_name):
+  def import_games_json(self, file_name):
     game_results = []
 
     # import game results
@@ -240,8 +271,8 @@ class TourneyManager:
       game_results.append(gr)
     self.game_results = game_results
 
-  
-  def import_player_results(self, file_name):
+
+  def import_players_json(self, file_name):
     # Import json file
     # parameter requires file extension.
     path = '../../' + file_name # TODO : refactor
@@ -252,9 +283,9 @@ class TourneyManager:
 
     # Convert list of dicts into list of player objects
     players = []
-    bot_dict = self.create_bot_dict()
+    bot_dict = self.get_bot_dict()
     for player_dict in p_jdata:
-      name = player_dict['Name']
+      name = player_dict['Name'] # Bot dict name is read from player name. should refactor
       bot = bot_dict[name]
       player = Player(bot, name)
       player.from_dict(player_dict)

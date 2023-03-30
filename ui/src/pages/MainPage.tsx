@@ -12,9 +12,10 @@ const MainPage = () => {
 
 
   useEffect(() => {
-    const dataset = 'nine'; // For testing directory
+    // TODO: refactor this to a config file
+    const dataset = 'continuer'; // For testing directory
 
-    fetch(`./results/${dataset}/games.json`)
+    fetch(`./results/${dataset}/${dataset}_games.json`) // remove the {dataset} prefix forold jsons
       .then((response) => response.json())
       .then((json) => {
         let games = processGamesResponse(json);
@@ -22,7 +23,7 @@ const MainPage = () => {
         console.log(games);
       });
 
-    fetch(`./results/${dataset}/players.json`)
+    fetch(`./results/${dataset}/${dataset}_players.json`)
       .then((response) => response.json())
       .then((json) => {
         let players = processPlayerResponse(json);
