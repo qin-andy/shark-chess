@@ -1,7 +1,10 @@
-from bots.bots import *
+from bots.bot_manager import BotManager
+from bots.composite_bots import *
+from bots.simple_bots import *
 from tourney.tourney import *
 from db.dao import *
 import os
+
 import chess
 import chess.engine
 
@@ -46,7 +49,7 @@ def run_tourney_export_json_test():
   
   players_1 = [player_sk, player_ar, player_pacifist, player_berserk]
 
-  players_2 = [player_sk, player_ar]
+  players_2 = [player_sk, player_ar, ]
 
   # gr = play_game(player_sk, player_pacifist, 300)
   # play_match(player_pacifist, player_sk, 5, True)
@@ -79,7 +82,6 @@ def continue_tourney_json_test():
   tourney.export_players_json('newnew_dict')
   engine.close()
 
-
 def dao_put_tourney_test():
   # Import dao
   tourney = Tourney('imported', 3)
@@ -89,7 +91,6 @@ def dao_put_tourney_test():
 
   dao = RecordsDao()
   dao.store_tourney(tourney)
-
 
 def dao_read_tourney_test():
   dao = RecordsDao()
@@ -109,7 +110,6 @@ MATCH_LENGTH = 50
 TOURNEY_NAME = 'Continuer'
 TOURNEY_PREFIX = 'continuer'
 UI_PATH = '../ui/public/results/continuer/'
-  
   
 # 1. Run tourney exported jsons
 def dao_cont_1():
@@ -134,7 +134,6 @@ def dao_cont_2():
 
   dao = RecordsDao()
   dao.store_tourney(tourney)
-
 
 # 3. Get tourney frommongodb, reconstruct tourney, continue tourney, export as json, put back into mongodb
 def dao_cont_3():
@@ -171,6 +170,61 @@ def dao_cont_cleanup():
   tourney = Tourney(TOURNEY_NAME, MATCH_LENGTH)
   dao.store_tourney(tourney)
 
+def bot_manager_export_test():
+  bm = BotManager()
+  
+  # List all codes
+  print(list(bm.simple_bots_map.keys()))
+  print(bm.composite_bot_codes)
+
+  # Testing get simple bots
+  bm.get_bot('AR')
+  player_ar = Player(bm.get_bot('AR'), "Random")
+  player_sk = Player(bm.get_bot('SK'), "Suicide King")
+  player_pacifist = Player(bm.get_bot('PC'), "Pacifist")
+  player_berserk = Player(bm.get_bot('BRK'), "Berserk")
+  player_panic = Player(bm.get_bot('PF'), "Panicfish")
+  player_sf = Player(bm.get_bot('SF'), 'Stockfish100')
+
+  # simple bots playerlist
+  players_simple = [player_sf, player_ar, player_pacifist]
+
+  # constructing composite bots manually
+  bot_sf_5 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.05)
+  bot_sf_10 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.1)
+  bot_sf_20 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.2)
+  bot_shark_0_3 = SharkFishBot(bm.get_bot('AR'), 0, 3, bm.engine, bm.base_limit)
+
+  bot_sf_sk = WaterBot(bm.get_bot('SF'), bm.get_bot('SK'), 0.5)
+  bot_sf_dk = WaterBot(bm.get_bot('SF'), bm.get_bot('DK'), 0.5)
+  bot_sf_brk = WaterBot(bm.get_bot('SF'), bm.get_bot('BRK'), 0.5)
+
+  bot_sf_dc_sk_brk = WaterBot(bot_sf_brk, bot_sf_dk, 0.5)
+
+  player_sf_5 = Player(bot_sf_5, "Stockfish 5")
+  player_sf_10 = Player(bot_sf_10, "Stockfish 10")
+  player_shark = Player(bot_shark_0_3, "Shark 0-3")
+
+  player_sf_sk = Player(bot_sf_sk, "SF SK 50")
+  player_sf_dk = Player(bot_sf_dk, "SF DK 50")
+  player_sf_brk = Player(bot_sf_brk, "SF BRK 50")
+  player_sf_lotto = Player(bot_sf_dc_sk_brk, "Lotto")
+  
+
+  players_composite_basic = [player_sf_5, player_sf_10, player_shark]
+  players_composite_nested = [player_sf_sk, player_sf_dk, player_sf_brk, player_sf_lotto]
+
+  ui_path_manager = '../ui/public/results/manager'
+
+  tourney = Tourney('manager', 1)
+  # tourney.play_tournament(players_composite_nested)
+  tourney.add_players_quiet(players_simple)
+
+  tourney.continue_tourney_multi(players_composite_basic)
+  tourney.export_games_json(ui_path_manager + '/' + 'manager')
+  tourney.export_players_json(ui_path_manager + '/' + 'manager')
+
+  bm.engine.close()
 
 if __name__ == '__main__':
   # run_tourney_export_json_test()
@@ -181,8 +235,11 @@ if __name__ == '__main__':
 
   # dao_cont_1()
   # dao_cont_2()
-  dao_cont_3()
+  # dao_cont_3()
   # dao_cont_cleanup()
+
+  bot_manager_export_test()
+
 
 
 

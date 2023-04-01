@@ -1,18 +1,10 @@
 # Helper that creates a random legal move
 import random
-import typing
 
 import chess
 import chess.engine
 
-
-# Base chess bot
-class ChessBot:
-  def make_move(self, board: chess.Board) -> typing.Tuple[chess.Move, str]:
-    pass
-
-  def __str__(self):
-    return "Base"
+from bots.chess_bot import ChessBot
 
 
 def move_rand(board: chess.Board) -> chess.Move:
@@ -24,6 +16,10 @@ def move_rand(board: chess.Board) -> chess.Move:
 
 # Always random move bot
 class AlwaysRandomBot(ChessBot):
+  code = 'AR'
+  def __init__(self):
+    super().__init__()
+
   def make_move(self, board):
     return move_rand(board), ''
 
@@ -34,7 +30,8 @@ class AlwaysRandomBot(ChessBot):
 # Full Stockfish Bot
 # Limit - thinking time in seconds
 class Stockfish100Bot(ChessBot):
-  def __init__(self, engine: chess.engine.SimpleEngine, limit):
+  code = 'SF'
+  def __init__(self, engine: chess.engine.SimpleEngine, limit: chess.engine.Limit):
     super().__init__()
     self.engine = engine
     self.limit = limit
@@ -48,33 +45,12 @@ class Stockfish100Bot(ChessBot):
     return "SF:" + str(self.limit)
 
 
-# Water Bot
-# Waters down any two bots by giving a random ratio of moves from one to the other
-class WaterBot(ChessBot):
-  def __init__(self, b1: ChessBot, b2: ChessBot, water_ratio: float):
-    super().__init__()
-    self.b1 = b1
-    self.b2 = b2
-    self.water_ratio = water_ratio
-    self.custom_name = None
-
-  def make_move(self, board):
-    move = chess.Move
-    if random.random() <= self.water_ratio:
-      move, comment = self.b1.make_move(board)
-      return move, '+' + comment
-    else:
-      move, comment = self.b2.make_move(board)
-      return move, '-' + comment
-
-  def __str__(self):
-    if self.custom_name == None:
-      return 'W:[' + str(self.b1) + str(self.b2) + ']R:' + str(self.water_ratio)
-    return self.custom_name
-
-
 # Always does moves which check. Then captures, then random after.
 class BerserkBot(ChessBot):
+  code = 'BRK'
+  def __init__(self):
+    super().__init__()
+
   def make_move(self, board):
     checks_arr = [move for move in board.generate_legal_moves() if board.gives_check(move)]
     captures_arr = [move for move in board.generate_legal_moves() if board.is_capture(move)]
@@ -92,9 +68,11 @@ class BerserkBot(ChessBot):
 
 # Prioitizes none-capturing moves.
 class PacifistBot(ChessBot):
+  code = 'PC'
+  def __init__(self):
+    super().__init__()
+  
   def make_move(self, board):
-    checks_arr = [move for move in board.generate_legal_moves() if board.gives_check(move)]
-    captures_arr = [move for move in board.generate_legal_moves() if board.is_capture(move)]
     moves_arr = [move for move in board.generate_legal_moves()]
     safe_moves_arr = [move for move in moves_arr if
                       (not board.gives_check(move)) and (not board.is_capture(move))]
@@ -109,6 +87,10 @@ class PacifistBot(ChessBot):
 
 # Prioitizes moving king (randomly)
 class DanceKingBot(ChessBot):
+  code = 'DK'
+  def __init__(self):
+    super().__init__()
+
   def make_move(self, board):
     moves_arr = [move for move in board.generate_legal_moves()]
     king_moves = [move for move in moves_arr if move.from_square == board.king(board.turn)]
@@ -123,6 +105,10 @@ class DanceKingBot(ChessBot):
 
 # Prioitizes moving king towards enemy king
 class SuicideKingBot(ChessBot):
+  code = 'SK'
+  def __init__(self):
+    super().__init__()
+
   def make_move(self, board):
     moves_arr = [move for move in board.generate_legal_moves()]
     king_moves = [move for move in moves_arr if move.from_square == board.king(board.turn)]
@@ -144,6 +130,7 @@ class SuicideKingBot(ChessBot):
 
 # Plays with Stockfish strength except when in check, then moves randomly
 class PanicFishBot(ChessBot):
+  code = 'PF'
   def __init__(self, engine: chess.engine.SimpleEngine, limit):
     super().__init__()
     self.engine = engine
@@ -158,43 +145,22 @@ class PanicFishBot(ChessBot):
 
   def __str__(self):
     return "PanicFish"
-
-
-# After capturing, gets excited and begins lurking, before entering a frenzy
-class SharkFishBot(ChessBot):
-  def __init__(self, shallow_bot: ChessBot, lurk_time, frenzy_time,
-               engine: chess.engine.SimpleEngine, limit):
+  
+# Plays with Stockfish strength except when in check or when a piece is captured, then moves randomly
+class SensitiveFish(ChessBot):
+  code = 'SNS'
+  def __init__(self, engine: chess.engine.SimpleEngine, limit):
     super().__init__()
-    self.custom_name = None
-    self.shallow_bot = shallow_bot
-    self.lurk_time = lurk_time
-    self.frenzy_time = frenzy_time
-    self.excitement_time = 0
     self.engine = engine
     self.limit = limit
 
   def make_move(self, board):
-    # Excitement Case
-    if self.excitement_time > 0:
-      if self.excitement_time <= self.frenzy_time:
-        comment = 'frenzy[' + str(self.excitement_time) + ']'
-        result = self.engine.play(board, self.limit)
-        self.excitement_time -= 1
-        return result.move, comment
-      else:
-        move, comment = self.shallow_bot.make_move(board)
-        lurk_comment = 'lurk[' + str(self.excitement_time) + ']'
-        comment = lurk_comment + ' --- ' + comment
-        self.excitement_time -= 1
-        return move, comment
-    # Make a shallow move. If it's a check or capture, get excited
-    move, comment = self.shallow_bot.make_move(board)
-    if board.gives_check(move) or board.is_capture(move):
-      self.excitement_time = self.lurk_time + self.frenzy_time
-      comment = '!' + comment
-    return move, comment
+    if (board.is_check()) or (board.halfmove_clock == 0): # this includes own captures.
+      return move_rand(board), "!?"
+    else:
+      result = self.engine.play(board, self.limit)
+      return result.move, ''
 
   def __str__(self):
-    if self.custom_name == None:
-      return 'Shark[' + str(self.shallow_bot) + ']R:' + str(self.limit)
-    return self.custom_name
+    return "SensitiveFish"
+

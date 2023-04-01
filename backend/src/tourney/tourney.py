@@ -5,8 +5,9 @@ import chess
 import chess.pgn
 import chess.engine
 import os
+from bots.composite_bots import WaterBot
 
-from bots.bots import *
+from bots.simple_bots import *
 from tourney.elo import calculate_elos
 from tourney.game_result import GameResult
 from tourney.player import Player
@@ -101,6 +102,15 @@ class Tourney:
     print()
 
     return grs
+  
+  
+  # adds a player, but doesn't play any games.
+  # used for updating player id.
+  def add_players_quiet(self, players: list[Player]):
+    for player in players: 
+      player.id = len(self.players)
+      self.players.append(player)
+
 
   # Play round robin tourney
   # Skips mirror matches
@@ -113,7 +123,6 @@ class Tourney:
       player.id = counter
       counter += 1
 
-    players = self.players
     match_length = self.match_length
 
     start_time = time.time()
@@ -161,6 +170,15 @@ class Tourney:
 
     print('Total time for continution: ' + str(total_time))
     return new_player, new_grs # used in dao
+  
+  def continue_tourney_multi(self, new_players: list[Player]):
+    new_grs = []
+    for new_player in new_players:
+      a, new_gr = self.continue_tourney(new_player)
+      new_grs.append(new_gr)
+
+    # original players list will be mutated
+    return new_players, new_grs
   
 
   # Exports stored game data as JSON

@@ -1,5 +1,5 @@
 
-from bots.bots import ChessBot
+from bots.chess_bot import ChessBot
 import time
 
 
@@ -46,6 +46,10 @@ class Player:
     player_dict['Draws'] = self.draws
     player_dict['Think Time'] = self.total_thinking_time
     player_dict['Moves'] = self.total_moves
+
+    player_dict['Bot Code'] = self.bot.code
+    player_dict['Bot Settings'] = self.bot.settings
+    
     return player_dict
   
   # updates fields based on player dictionary

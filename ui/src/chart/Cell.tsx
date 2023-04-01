@@ -35,8 +35,8 @@ const Cell = (props: {
     margin: '2px',
   }
 
-  // Mirror match case, show nothing
-  if (x === y) {
+  // Empty match case, show nothing
+  if (games === undefined || games.length === 0) {
     return (
       <div className='cell'>
       </div>
