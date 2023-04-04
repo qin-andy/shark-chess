@@ -5,6 +5,7 @@ import chess
 import chess.pgn
 import chess.engine
 import os
+from bots.bot_manager import BotManager
 from bots.composite_bots import WaterBot
 
 from bots.simple_bots import *
@@ -15,8 +16,11 @@ from tourney.player import Player
 
 class Tourney:
   # default constructor
-  def __init__(self, friendly_name, match_length: int):
-    # Tourney settings
+  def __init__(self, friendly_name: str, match_length: int, bot_manager=None):
+    if bot_manager == None:
+      bot_manager = BotManager()
+      
+    # Tourney settingstou
     self.match_length = match_length
     self.elo_k = 32 # controls Elo gain/loss
 
@@ -24,9 +28,10 @@ class Tourney:
     self.players: list[Player] = []
     self.friendly_name = friendly_name
 
-    self.bot_dict = None
     self.game_number = 0 # increment after a game result is assigend this. pseudo id
-    self.engine = None # TODO : used for tourney continuation in create_bot_dict. 
+
+    self.bot_manager = bot_manager
+
 
   # Play a single game between players
   def play_game(self, wp: Player, bp: Player, turn_limit: int) -> GameResult:
@@ -174,6 +179,7 @@ class Tourney:
   def continue_tourney_multi(self, new_players: list[Player]):
     new_grs = []
     for new_player in new_players:
+      # a is discarded
       a, new_gr = self.continue_tourney(new_player)
       new_grs.append(new_gr)
 
@@ -182,7 +188,12 @@ class Tourney:
   
 
   # Exports stored game data as JSON
-  def export_games_json(self, file_name) -> str:
+  # file_name: name of the json, will be exported as a file:
+    # <name>_games.json
+  # defaults name to friendly_name
+  def export_games_json(self, file_name=None) -> str:
+    if file_name == None:
+      file_name = self.friendly_name
     data = []
     for gr in self.game_results:
       data.append(gr.to_dict())
@@ -194,8 +205,12 @@ class Tourney:
 
     # files.download('output.csv')
 
-  # Exports stored player data as jsonz`z`
-  def export_players_json(self, file_name):
+  # Exports stored player data as json
+    # file_name: name of the json, will be exported as a file:
+    # <name>_players.json
+  def export_players_json(self, file_name=None):
+    if file_name == None:
+      file_name = self.friendly_name
     data = []
     for player in self.players:
       data.append(player.to_dict())
@@ -206,8 +221,17 @@ class Tourney:
     with open(file_name + '_players.json', 'w') as file:
       file.write(json_data,)
 
+
+  # data representing tourney settings in a single dictionary
+  def get_tourney_settings(self):
+    settings = {
+      'Name': self.friendly_name,
+      'Match Length': self.match_length,
+    }
+    return settings
+
   # Exports game and player data in a single json
-  def export_tourney(self, file_name):
+  def export_tourney_json(self, file_name):
     player_data = []
     for player in self.players:
       player_data.append(player.to_dict())
@@ -216,62 +240,16 @@ class Tourney:
     for gr in self.game_results:
       game_data.append(gr.to_dict())
     
-    tourney_data = {
-      'Name': self.friendly_name,
-      'Match Length': self.match_length,
+    tourney_data = {}
+    tourney_data.update(self.get_tourney_settings())
+    tourney_data.update({
       'Players': player_data,
       'Games': game_data
-    }
+    })
 
     # TODO : refactor this into a constant, the export name
     with open(file_name + '_tourney.json', 'w') as file:
       file.write(tourney_data,)
-
-
-  # Generates a labelled dictionary of bots
-  # Used for importing tourneys from JSON
-  # TODO : this should be refactored into constants of some sort
-  def get_bot_dict(self) -> dict:
-    if (self.bot_dict != None):
-      return self.bot_dict
-    bot_dict = {}
-
-    # Initializing vanilla bots
-    bot_ar = AlwaysRandomBot()
-    bot_sk = SuicideKingBot()
-    bot_pacifist = PacifistBot()
-    bot_berserk = BerserkBot()
-
-
-    # Stockfish bots
-    # for testing, you can manually set self.engine to give custom engine. otherwise, creates one.
-    if self.engine == None:
-      stockfish_path = '../../stockfish/stockfish-ubuntu-20.04-x86-64' # TODO : refactor
-      dirname = os.path.dirname(__file__)
-      filename = os.path.join(dirname, stockfish_path)
-      engine = chess.engine.SimpleEngine.popen_uci(filename) # TODO : should close this after continuing tourney
-      self.engine = engine
-
-    base_limit = chess.engine.Limit(time=0.1, depth=5)
-    bot_sf = Stockfish100Bot(self.engine, base_limit)
-    bot_sf_5 = WaterBot(bot_sf, bot_ar, 0.05)
-    bot_sf_10 = WaterBot(bot_sf, bot_ar, 0.1)
-    bot_sf_20 = WaterBot(bot_sf, bot_ar, 0.2)
-    bot_panic = PanicFishBot(self.engine, base_limit)
-
-    bot_dict["Random"] = bot_ar
-    bot_dict["Suicide King"] = bot_sk
-    bot_dict["Pacifist"] = bot_pacifist
-    bot_dict["Berserk"] = bot_berserk
-    bot_dict["Panicfish"] = bot_panic
-    bot_dict["Stockfish 100"] = bot_sf
-    bot_dict["Stockfish 5"] = bot_sf_5
-    bot_dict["Stockfish 10"] = bot_sf_10
-    bot_dict["Stockfish 20"] = bot_sf_20
-
-    # TODO : handle engine return for closing
-    self.bot_dict = bot_dict
-    return bot_dict
 
   def import_games_json(self, file_name):
     game_results = []
@@ -301,10 +279,9 @@ class Tourney:
 
     # Convert list of dicts into list of player objects
     players = []
-    bot_dict = self.get_bot_dict()
     for player_dict in p_jdata:
-      name = player_dict['Name'] # Bot dict name is read from player name. should refactor
-      bot = bot_dict[name]
+      name = player_dict['Name']
+      bot = self.bot_manager.get_bot(player_dict['Bot Code'], player_dict['Bot Settings'])
       player = Player(bot, name)
       player.from_dict(player_dict)
       players.append(player)

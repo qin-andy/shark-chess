@@ -10,12 +10,11 @@ const MainPage = () => {
   const [matchups, setMatchups] = useState<any>();
   const [cellData, setCellData] = useState<CellData[][]>();
 
-
   useEffect(() => {
     // TODO: refactor this to a config file
     const dataset = 'continuer'; // For testing directory
 
-    fetch(`./results/${dataset}/${dataset}_games.json`) // remove the {dataset} prefix forold jsons
+    fetch(`./results/${dataset}/${dataset}_games.json`) // remove the {dataset} prefix for old jsons
       .then((response) => response.json())
       .then((json) => {
         let games = processGamesResponse(json);

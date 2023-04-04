@@ -1,0 +1,74 @@
+[
+  {
+    "Name": "Random",
+    "ID": 0,
+    "Elo": 625,
+    "Wins": 0,
+    "Losses": 20,
+    "Draws": 0,
+    "Think Time": 0.09043002128601074,
+    "Moves": 479,
+    "Bot Code": "AR",
+    "Bot Settings": {}
+  },
+  {
+    "Name": "Pacifist",
+    "ID": 1,
+    "Elo": 681,
+    "Wins": 0,
+    "Losses": 20,
+    "Draws": 0,
+    "Think Time": 0.40790629386901855,
+    "Moves": 414,
+    "Bot Code": "PC",
+    "Bot Settings": {}
+  },
+  {
+    "Name": "Berserk",
+    "ID": 2,
+    "Elo": 824,
+    "Wins": 2,
+    "Losses": 11,
+    "Draws": 7,
+    "Think Time": 1.517620325088501,
+    "Moves": 1250,
+    "Bot Code": "BRK",
+    "Bot Settings": {}
+  },
+  {
+    "Name": "Suicide King",
+    "ID": 3,
+    "Elo": 696,
+    "Wins": 0,
+    "Losses": 20,
+    "Draws": 0,
+    "Think Time": 0.04494810104370117,
+    "Moves": 206,
+    "Bot Code": "SK",
+    "Bot Settings": {}
+  },
+  {
+    "Name": "Dance King",
+    "ID": 4,
+    "Elo": 722,
+    "Wins": 0,
+    "Losses": 20,
+    "Draws": 0,
+    "Think Time": 0.060588836669921875,
+    "Moves": 284,
+    "Bot Code": "DK",
+    "Bot Settings": {}
+  },
+  {
+    "Name": "Sensitive",
+    "ID": 5,
+    "Elo": 1153,
+    "Wins": 91,
+    "Losses": 2,
+    "Draws": 7,
+    "Think Time": 57.550015687942505,
+    "Moves": 2679,
+    "Bot Code": "SNS",
+    "Bot Settings": {}
+  }
+]

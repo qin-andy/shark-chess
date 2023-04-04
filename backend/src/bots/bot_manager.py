@@ -12,7 +12,7 @@ import chess.engine
 # 2. Tourney continuation: lookup table for simple bots
 # 3. Tourney continuation: creates composite bots per bot settings.
 class BotManager:
-  base_limit = chess.engine.Limit(time=0.1, depth=5)
+  base_limit = chess.engine.Limit(time=0.1, depth=10)
 
   # Two categories of bots
   # Simple bots have no configuration settings and can be constructed as is
@@ -33,10 +33,11 @@ class BotManager:
     engine = chess.engine.SimpleEngine.popen_uci(filename) # TODO : should close this after continuing tourney
     self.engine = engine
 
-    base_limit = chess.engine.Limit(time=0.1, depth=5)
+    base_limit = self.base_limit
     
     bot_sf = Stockfish100Bot(self.engine, base_limit)
     bot_panic = PanicFishBot(self.engine, base_limit)
+    bot_sns = SensitiveFish(self.engine, base_limit)
 
 
     # Simple bots are preconstructed as above, and accessed through loopkup table
@@ -48,6 +49,7 @@ class BotManager:
       bot_sf.code: bot_sf,
       bot_panic.code: bot_panic,
       bot_dance.code: bot_dance,
+      bot_sns.code: bot_sns,
     }
 
     if '0' in simple_bots_map.keys():
@@ -80,5 +82,6 @@ class BotManager:
       # Casework
       if code == 'WB':
         print('smubbis')
+        # TODO : casework for loading WB
         
     raise Exception('Code not in bot manager: ' + str(code))

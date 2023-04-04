@@ -4,6 +4,7 @@ import random
 import chess
 import chess.engine
 
+
 from bots.chess_bot import ChessBot
 
 
@@ -154,7 +155,7 @@ class SensitiveFish(ChessBot):
     self.engine = engine
     self.limit = limit
 
-  def make_move(self, board):
+  def make_move(self, board: chess.Board):
     if (board.is_check()) or (board.halfmove_clock == 0): # this includes own captures.
       return move_rand(board), "!?"
     else:

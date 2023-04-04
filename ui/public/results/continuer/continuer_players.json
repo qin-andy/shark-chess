@@ -1,0 +1,50 @@
+[
+  {
+    "Name": "Suicide King",
+    "ID": 0,
+    "Elo": 761,
+    "Wins": 5,
+    "Losses": 6,
+    "Draws": 7,
+    "Think Time": 0.44618892669677734,
+    "Moves": 1618,
+    "Bot Code": "SK",
+    "Bot Settings": {}
+  },
+  {
+    "Name": "Random",
+    "ID": 1,
+    "Elo": 839,
+    "Wins": 5,
+    "Losses": 1,
+    "Draws": 12,
+    "Think Time": 0.35121846199035645,
+    "Moves": 2073,
+    "Bot Code": "AR",
+    "Bot Settings": {}
+  },
+  {
+    "Name": "Pacifist",
+    "ID": 2,
+    "Elo": 642,
+    "Wins": 0,
+    "Losses": 16,
+    "Draws": 2,
+    "Think Time": 1.3093640804290771,
+    "Moves": 1496,
+    "Bot Code": "PC",
+    "Bot Settings": {}
+  },
+  {
+    "Name": "Berserk",
+    "ID": 3,
+    "Elo": 926,
+    "Wins": 13,
+    "Losses": 0,
+    "Draws": 5,
+    "Think Time": 1.5143067836761475,
+    "Moves": 1113,
+    "Bot Code": "BRK",
+    "Bot Settings": {}
+  }
+]
