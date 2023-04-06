@@ -56,9 +56,7 @@ class RecordsDao:
     db[name+'_tourney_settings'].delete_many({})
     return count
 
-
-  # Retrieves and constructs tourney object by name
-  def get_tourney(self, name, gameless=False):
+  def get_tourney_as_dict(self, name) -> dict:
     db = self.db
     if (name + '_tourney_settings') not in db.list_collection_names():
       print('Tourney not found!') # TODO : Error handle this
@@ -68,6 +66,19 @@ class RecordsDao:
     players = db[name+'_players'].find()
     settings = db[name+'_tourney_settings'].find_one()
 
+    tourney_dict = {
+      'Games': list(games),
+      'Players': list(players),
+      'Settings': settings
+    }
+    return tourney_dict
+
+  # Retrieves and constructs tourney object by name
+  def get_tourney(self, name, gameless=False) -> Tourney:
+    tourney_dict = self.get_tourney_as_dict(name)
+    games = tourney_dict['Games']
+    players = tourney_dict['Players']
+    settings = tourney_dict['Settings']
     tourney = Tourney(name, settings['Match Length'], self.bot_manager) 
     if not gameless: # for tourney continuation, previous games aren't important
       for game in games:

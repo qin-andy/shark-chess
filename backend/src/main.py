@@ -27,18 +27,16 @@ def dao_cont_1(dao: RecordsDao, bm: BotManager):
   player_ar = Player(bm.get_bot('AR'), "Random")
   player_sk = Player(bm.get_bot('SK'), "Suicide King")
   player_pc = Player(bm.get_bot('PC'), "Pacifist")
-  players_2 = [player_sk, player_ar, player_pc]
+  players_2 = [player_sk, player_ar]
 
   tourney = Tourney(TOURNEY_NAME, MATCH_LENGTH, bm)
   tourney.play_tournament(players_2)
-  tourney.export_games_json()
-  tourney.export_players_json()
+  tourney.export_tourney_json()
 
 # 2. import json to reconstruct tourney, dump into mongodb
 def dao_cont_2(dao: RecordsDao, bm: BotManager):
   tourney = Tourney(TOURNEY_NAME, MATCH_LENGTH, bm)
-  tourney.import_games_json(TOURNEY_NAME + '_games.json')
-  tourney.import_players_json(TOURNEY_NAME + '_players.json')
+  tourney.import_tourney_json(TOURNEY_NAME + '_tourney.json')
 
   dao.store_tourney(tourney)
 
@@ -51,16 +49,14 @@ def dao_cont_3(dao: RecordsDao, bm: BotManager):
 
   dao.store_tourney(dao_tourney) # wasteful, rewrites all games. in the future, use limited write.
   
-  dao_tourney.export_games_json(UI_PATH + '/' + TOURNEY_NAME)
-  dao_tourney.export_players_json(UI_PATH + '/' + TOURNEY_NAME)
+  dao_tourney.export_tourney_json(UI_PATH + '/' + TOURNEY_NAME)
 
 # resets all dao_cont things
 def dao_cont_cleanup(dao: RecordsDao):
   dao.clear_tourney(TOURNEY_NAME)
   
 
-def quiet_continue_stanard_test():
-  bm = BotManager()
+def quiet_continue_stanard_test(bm: BotManager):
   
   # List all codes
   print(list(bm.simple_bots_map.keys()))
@@ -148,10 +144,8 @@ def quiet_continue_stanard_test():
   tourney.export_games_json(ui_path_manager + '/' + 'manager')
   tourney.export_players_json(ui_path_manager + '/' + 'manager')
 
-  bm.engine.close()
 
-
-def bot_manager_export_test():
+def bot_manager_export_test(bm: BotManager):
   
   # List all codes
   print(list(bm.simple_bots_map.keys()))
@@ -217,8 +211,8 @@ if __name__ == '__main__':
   bm.engine.close()
   dao.client.close()
 
-  # bot_manager_export_test()
-  # quiet_continue_stanard_test()
+  # bot_manager_export_test(bm)
+  # quiet_continue_stanard_test(bm)
 
 
 

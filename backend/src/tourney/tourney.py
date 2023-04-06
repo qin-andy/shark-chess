@@ -231,7 +231,10 @@ class Tourney:
     return settings
 
   # Exports game and player data in a single json
-  def export_tourney_json(self, file_name):
+  def export_tourney_json(self, file_name=None):
+    if file_name == None:
+      file_name = self.friendly_name
+
     player_data = []
     for player in self.players:
       player_data.append(player.to_dict())
@@ -240,20 +243,17 @@ class Tourney:
     for gr in self.game_results:
       game_data.append(gr.to_dict())
     
-    tourney_data = {}
-    tourney_data.update(self.get_tourney_settings())
-    tourney_data.update({
+    tourney_dict = {
+      'Games': game_data,
       'Players': player_data,
-      'Games': game_data
-    })
+      'Settings': self.get_tourney_settings()
+    }
 
     # TODO : refactor this into a constant, the export name
     with open(file_name + '_tourney.json', 'w') as file:
-      file.write(tourney_data,)
+      file.write(json.dumps(tourney_dict, indent=2),)
 
   def import_games_json(self, file_name):
-    game_results = []
-
     # import game results
     # parameter requires file extension.
     path = '../../' + file_name  # TODO : refactor
@@ -261,6 +261,8 @@ class Tourney:
     filename = os.path.join(dirname, path)
     g_file = open(filename)
     g_jdata = json.loads(g_file.read())
+
+    game_results = []
     for game_dict in g_jdata:
       gr = GameResult()
       gr.from_dict(game_dict)
@@ -286,4 +288,30 @@ class Tourney:
       player.from_dict(player_dict)
       players.append(player)
 
+
+  def import_tourney_json(self, file_name):
+    path = '../../' + file_name # TODO : refactor
+    dirname = os.path.dirname(__file__)
+    filename = os.path.join(dirname, path)
+    t_file = open(filename)
+    t_data = json.loads(t_file.read())
+
+    # Todo: add validation here
+    g_data = t_data['Games']
+    p_data = t_data['Players']
+
+    game_results = []
+    for game_dict in g_data:
+      gr = GameResult()
+      gr.from_dict(game_dict)
+      game_results.append(gr)
+    self.game_results = game_results
+
+    players = []
+    for player_dict in p_data:
+      name = player_dict['Name']
+      bot = self.bot_manager.get_bot(player_dict['Bot Code'], player_dict['Bot Settings'])
+      player = Player(bot, name)
+      player.from_dict(player_dict)
+      players.append(player)
     self.players = players

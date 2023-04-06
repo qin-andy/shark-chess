@@ -13,31 +13,34 @@ const MainPage = () => {
   useEffect(() => {
     // TODO: refactor this to a config file
     const dataset = 'continuer'; // For testing directory
+    
+    // fetch(`./results/${dataset}/${dataset}_tourney.json`)
+    //   .then((response) => response.json())
+    //   .then((json) => {
+    //     let games = processGamesResponse(json['Games']);
+    //     setGameData(games);
+    //     console.log(games);
 
-    fetch(`./results/${dataset}/${dataset}_games.json`) // remove the {dataset} prefix for old jsons
+    //     let players = processPlayerResponse(json['Players']);
+    //     players?.sort((a, b) => {
+    //       return b.elo - a.elo
+    //     });
+    //     setPlayerData(players);
+    //     console.log(players);
+    //   });
+
+    // Hit FLask API
+    fetch(`http://localhost:5000/tourney/${dataset}`)
       .then((response) => response.json())
       .then((json) => {
-        let games = processGamesResponse(json);
+        let games = processGamesResponse(json['Games']);
         setGameData(games);
         console.log(games);
-      });
 
-    fetch(`./results/${dataset}/${dataset}_players.json`)
-      .then((response) => response.json())
-      .then((json) => {
-        let players = processPlayerResponse(json);
+        let players = processPlayerResponse(json['Players']);
         players?.sort((a, b) => {
           return b.elo - a.elo
         });
-
-        // For testing ordering
-        // let array = players;
-        // for (let i = array.length - 1; i > 0; i--) {
-        //   const j = Math.floor(Math.random() * (i + 1));
-        //   [array[i], array[j]] = [array[j], array[i]];
-        // }
-        // players = array;
-
         setPlayerData(players);
         console.log(players);
       });

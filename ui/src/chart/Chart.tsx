@@ -20,21 +20,21 @@ const Chart = (props: {
     let components = []
     
     // Also need to build labels. First "row" of components is all labels.
-    let label_row = [(<div className='label-row-item'></div>)]; // first label row
+    let label_row = [(<div className='label-row-item'  key={-1}/>)]; // first label row 
     console.log(cellData)
 
     // Reverse out of play (not in place)
     let reverse_players = players.map((player, index) => {return players[players.length-1-index]});
     for (let i = 1; i < dimension + 1; i++) {
       let label = (
-        <div className='label-row-item'>
+        <div className='label-row-item' key={'player' + i}>
           {reverse_players[i-1].name}
         </div>
       );
       label_row.push(label);
     }
     components.push(
-      <div className='chart-row'>
+      <div className='chart-row' key={'row' + -1}>
         {label_row}
       </div>
     );
@@ -45,7 +45,7 @@ const Chart = (props: {
         // first element of every row has to be a label
         if (x === 0) {
           let label = (
-          <div className='label-column-item'>
+          <div className='label-column-item' key={'label col' + x}>
             {reverse_players[y].name}
           </div>
         );
@@ -67,8 +67,9 @@ const Chart = (props: {
         )
         y_row.push(element);
       }
+
       components.push(
-        <div className='chart-row'>
+        <div className='chart-row' key={y}>
           {y_row}
         </div>
       );
