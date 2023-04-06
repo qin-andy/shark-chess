@@ -81,7 +81,7 @@ class Tourney:
       wp.draws += 1 
 
     wp.elo, bp.elo = calculate_elos(wp.elo, bp.elo, self.elo_k, d)
-    print(str(wp) + ': ' + str(wp.elo) + ', ' + str(bp) + ': ' + str(bp.elo))
+    # print(str(wp) + ': ' + str(wp.elo) + ', ' + str(bp) + ': ' + str(bp.elo))
   
 
   # Helper to play multiple games between two bots

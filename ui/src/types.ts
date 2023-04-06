@@ -27,6 +27,10 @@ export interface Player {
   wins: number,
   losses: number,
   draws: number,
+  thinkTime: number,
+  totalMoves: number, 
+  botCode: string,
+  botSettings: any
 }
 
 /** Wrapper for tourney data used by Cell components including UI state */

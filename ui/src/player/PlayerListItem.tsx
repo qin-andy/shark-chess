@@ -19,17 +19,23 @@ const PlayerSummary = (props: {
     backgroundColor: `rgb(${r},${g},${b})`
   };
 
-  if (expanded) new_style = {...new_style, height: '200px'}
+  if (expanded) new_style = {...new_style }
+
+  let total_games = wins+losses+draws;
 
   return (
     <div className='player-list-item' style={new_style} onClick={handleClick}>
       <p className='player-name'>{player.name}</p>
-      <p className='player-elo'>{player.elo}</p>
+      <p className='player-elo'>ELO: {player.elo}</p>
       <p className='player-wld'>{wins}/{losses}/{draws}</p>
+
+      <p>Time per Game: {Math.round(100*player.thinkTime / total_games)/100}</p>
+      <p>Moves per Game: {Math.round(100*player.totalMoves / total_games)/100}</p>
       {expanded ? 
-        <div>
-          
-        </div> : null
+        <>
+          <p>Total Time: {Math.round(player.thinkTime * 100) / 100}</p>
+          <p>Total Moves: {player.totalMoves}</p>
+        </> : null
       }
     </div>
   )

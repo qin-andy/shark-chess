@@ -29,14 +29,18 @@ export const processGamesResponse = (data: any) => {
 export const processPlayerResponse = (data: any) => {
   let results: Player[] = [];
   for (let i = 0; i < data.length; i++) {
-    let playerData = data[i];
+    let p = data[i];
     let player: Player = {
-      name: playerData['Name'],
-      id: playerData['ID'],
-      elo: playerData['Elo'],
-      wins: playerData['Wins'],
-      losses: playerData['Losses'],
-      draws: playerData['Draws'],
+      name: p['Name'],
+      id: p['ID'],
+      elo: p['Elo'],
+      wins: p['Wins'],
+      losses: p['Losses'],
+      draws: p['Draws'],
+      thinkTime: p['Think Time'],
+      totalMoves: p['Moves'],
+      botCode: p['Bot Code'],
+      botSettings: p['Bot Settings']
     }
     results.push(player);
   }

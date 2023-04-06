@@ -14,11 +14,11 @@ h1 {
   justify-content: center;
   align-items: center;
 
-  border: 4px solid black;
-  border-radius: 20px;
-  background-color: burlywood;
+  /* border: 4px solid black; */
+  /* border-radius: 20px; */
+  /* background-color: burlywood; */
 
-  width: 17vw;
+  width: 21vw;
 }
 
 .player-list-item {
@@ -27,6 +27,7 @@ h1 {
   width: 80%;
 
   text-align: center;
+  font-size: 15 px;
 
   border: 4px solid black;
   border-radius: 20px;

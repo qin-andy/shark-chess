@@ -146,7 +146,6 @@ def quiet_continue_stanard_test(bm: BotManager):
 
 
 def bot_manager_export_test(bm: BotManager):
-  
   # List all codes
   print(list(bm.simple_bots_map.keys()))
   print(bm.composite_bot_codes)
@@ -189,30 +188,118 @@ def bot_manager_export_test(bm: BotManager):
 
   # quiet players not hving explicit games played
 
-  ui_path_manager = '../ui/public/results/manager'
+  # ui_path_manager = '../ui/public/results/manager'
+  ui_path_manager = '.'
 
-  tourney = Tourney('manager', 10, bm)
+  tourney = Tourney('export', 1, bm)
   tourney.play_tournament(players_composite_nested)
-  tourney.add_players_quiet(players_simple )
+  # tourney.add_players_quiet(players_simple )
 
-  tourney.continue_tourney_multi(players_composite_basic)
-  tourney.export_games_json(ui_path_manager + '/' + 'manager')
-  tourney.export_players_json(ui_path_manager + '/' + 'manager')
+  # tourney.continue_tourney_multi(players_composite_basic)
+  tourney.export_games_json(ui_path_manager + '/' + 'export')
+  tourney.export_players_json(ui_path_manager + '/' + 'export')
+
+def run_tourney_store_db(dao: RecordsDao, bm: BotManager):
+  # List all codes
+  print(list(bm.simple_bots_map.keys()))
+  print(bm.composite_bot_codes)
+
+  player_ar = Player(bm.get_bot('AR'), "Random")
+  player_sk = Player(bm.get_bot('SK'), "Suicide King")
+  player_pc = Player(bm.get_bot('PC'), "Pacifist")
+  player_brk = Player(bm.get_bot('BRK'), "Berserk")
+  player_pf = Player(bm.get_bot('PF'), "Panicfish")
+  player_dk = Player(bm.get_bot('DK'), 'Dance King')
+  player_sf = Player(bm.get_bot('SF'), 'Stockfish100')
+
+  bot_sf_5 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.05)
+  bot_sf_10 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.1)
+  bot_sf_30 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.3)
+  bot_sf_50 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.5)
+  bot_sf_70 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.7)
+  bot_sf_75 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.75)
+  bot_sf_80 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.78)
+  bot_sf_90 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.9)
+  bot_sf_95 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.95)
+
+
+  player_sf_5 = Player(bot_sf_5, "Stockfish 5")
+  player_sf_10 = Player(bot_sf_10, "Stockfish 10")
+  player_sf_30 = Player(bot_sf_30, "Stockfish 30")
+  player_sf_50 = Player(bot_sf_50, "Stockfish 50")
+  player_sf_70 = Player(bot_sf_70, "Stockfish 70")
+  player_sf_75 = Player(bot_sf_75, "Stockfish 75")
+  player_sf_80 = Player(bot_sf_80, "Stockfish 80")
+  player_sf_90 = Player(bot_sf_90, "Stockfish 90")
+  player_sf_95 = Player(bot_sf_95, "Stockfish 95")
+
+  lineup_standard = [
+    # player_ar,
+    # player_pc,
+    # player_brk,
+    # player_sk,
+    # player_dk,
+
+    # player_sf_5,
+    # player_sf_10, 
+    # player_sf_30, 
+    # player_sf_50, 
+    # player_sf_70, 
+    # player_sf_75, 
+    # player_sf_80,
+    # player_sf_90, 
+    # player_sf_95, 
+    # player_sf
+  ]
+
+  # quiet players not hving explicit games played
+
+  # experiment players:
+  bot_sf_sk = WaterBot(bm.get_bot('SF'), bm.get_bot('SK'), 0.25)
+  bot_sf_dk = WaterBot(bm.get_bot('SF'), bm.get_bot('DK'), 0.25)
+  bot_sf_brk = WaterBot(bm.get_bot('SF'), bm.get_bot('BRK'), 0.25)
+  bot_sf_dc_sk_brk = WaterBot(bot_sf_brk, bot_sf_dk, 0.5)
+
+  player_sf_sk = Player(bot_sf_sk, "Quarter Suicide")
+  player_sf_dk = Player(bot_sf_dk, "Quarter Dance")
+  player_sf_brk = Player(bot_sf_brk, "Quarter Berserk")
+  player_sf_lotto = Player(bot_sf_dc_sk_brk, "Lotto")
+
+  player_sns = Player(bm.get_bot('SNS'), 'Sensitive')
+
+  lineup_performing = [
+    player_sf_sk,
+    player_sf_dk, 
+    player_sf_brk, 
+    player_sf_lotto, 
+    # player_sns
+  ]
+
+  # standard lineup is added quietly
+  tourney = Tourney('manager', 10, bm)
+  # tourney.add_players_quiet(lineup_standard)
+
+  tourney.continue_tourney_multi(lineup_performing)
+  dao.store_tourney(tourney)
+
 
 if __name__ == '__main__':
   bm = BotManager()
   dao = RecordsDao(bm)
 
-  dao_cont_1(dao, bm)
-  dao_cont_2(dao, bm)
-  dao_cont_3(dao, bm)
+  # dao_cont_1(dao, bm)
+  # dao_cont_2(dao, bm)
+  # dao_cont_3(dao, bm)
   # dao_cont_cleanup(dao)
+
+  run_tourney_store_db(dao, bm)
+  # bot_manager_export_test(bm)
+  # quiet_continue_stanard_test(bm)
 
   bm.engine.close()
   dao.client.close()
 
-  # bot_manager_export_test(bm)
-  # quiet_continue_stanard_test(bm)
+
 
 
 

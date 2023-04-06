@@ -21,9 +21,10 @@ const Chart = (props: {
     
     // Also need to build labels. First "row" of components is all labels.
     let label_row = [(<div className='label-row-item'  key={-1}/>)]; // first label row 
+    // initialized with one elemnt in it,representing the first diagonal one. this one is empty.
     console.log(cellData)
 
-    // Reverse out of play (not in place)
+    // Reverse (not in place) so the labels will be ordered form least to highest elo
     let reverse_players = players.map((player, index) => {return players[players.length-1-index]});
     for (let i = 1; i < dimension + 1; i++) {
       let label = (
@@ -33,12 +34,15 @@ const Chart = (props: {
       );
       label_row.push(label);
     }
+    
+    // Create first row into the components grid
     components.push(
       <div className='chart-row' key={'row' + -1}>
         {label_row}
       </div>
     );
  
+    // Start generating the rest of the rows
     for (let y = 0; y < cellData.length; y++) {
       let y_row = [];
       for (let x = 0; x < cellData.length; x++) {

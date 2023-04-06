@@ -12,8 +12,8 @@ const MainPage = () => {
 
   useEffect(() => {
     // TODO: refactor this to a config file
-    const dataset = 'continuer'; // For testing directory
-    
+    const dataset = 'manager'; // For testing directory
+
     // fetch(`./results/${dataset}/${dataset}_tourney.json`)
     //   .then((response) => response.json())
     //   .then((json) => {
