@@ -1,5 +1,4 @@
 import React from 'react';
-import Chart from './chart/Chart';
 import './App.css'
 import MainPage from './pages/MainPage';
 

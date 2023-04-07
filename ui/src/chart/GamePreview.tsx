@@ -11,12 +11,12 @@ const GamePreview = (props: {
   game: GameResult;
 }) => {
   let { game } = props;
-  
+
   const [copied, setCopied] = useState(false);
   const divRef = useRef(null);
 
   useEffect(() => {
-    new Chessboard(divRef.current, {position: fen});
+    new Chessboard(divRef.current, { position: fen });
   }, [])
 
   const onCopied = () => {

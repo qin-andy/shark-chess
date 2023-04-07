@@ -7,7 +7,7 @@ const CellList = (props: {
   bp: string,
   games: GameResult[],
 }) => {
-  let {wp, bp, games} = props;
+  let { wp, bp, games } = props;
   const [gameItemData, setGameItemData] = useState<GameItemData[]>([]);
   useEffect(() => {
     setGameItemData(buildCellListItemData(games));

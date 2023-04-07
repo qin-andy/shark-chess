@@ -4,8 +4,15 @@ import time
 
 
 class Player:
+  """
+  Represents a player in a tourney.
+  Holds bot for move generation.
+  Also holds a friendly display name and player-level statistics.
+  Has an ID controlled at tourney level.
+  """
+
   def __init__(self, friendly_name, bot: ChessBot):
-    self.id: int = None # Assigned at tourney level (At start tourney)
+    self.id: int = None  # Assigned at tourney level (At start tourney)
     self.friendly_name: str = friendly_name
     self.bot: ChessBot = bot
     self.elo: int = 800  # default Elo
@@ -18,14 +25,20 @@ class Player:
     self.total_moves: int = 0
 
   def move(self, board):
+    """
+    Calls the inner bot to make a move. Includes timing logic. 
+    """
     start_time = time.time()
     move = self.bot.make_move(board)
     self.total_thinking_time += time.time() - start_time
     self.total_moves += 1
     return move
-  
-  # Exports player as a dictionary
+
   def to_dict(self):
+    """
+    Exports player information as a dictionary for serialization/storage
+    """
+
     # {
     #   "Name": "Random",
     #   "ID": 1,
@@ -48,11 +61,15 @@ class Player:
     player_dict['Moves'] = self.total_moves
 
     player_dict['Bot Settings'] = self.bot.settings
-    
+
     return player_dict
-  
-  # updates fields based on player dictionary
+
   def from_dict(self, player_dict):
+    """
+    Updates fields with player information from dictionary. Used for reading in data.
+    Note that name and bot are not imported, but assigned in the constructor. 
+    """
+  
     self.name = player_dict['Name'] # might be redundant, since this is set in constructor.
     self.id = player_dict['ID']
     self.elo = int(player_dict['Elo'])

@@ -34,7 +34,7 @@ h1 {
   background-color: rgb(154, 154, 154);
 }
 
-.player-list-item > p {
+.player-list-item>p {
   margin: 0px;
 }
 

@@ -8,7 +8,7 @@ from flask_cors import CORS
 from db.dao import RecordsDao
 
 app = Flask(__name__, static_folder='../../ui/build')
-CORS(app) # TODO : only for testing
+CORS(app)  # TODO :only for testing
 
 
 # Singletons declared here (?)
@@ -27,11 +27,10 @@ def get_tourney(tourney_name):
   # Error handle this
   if tourney_json == None:
     return 'Tourney not found: <' + str(tourney_name) + '>', 400
-  
-  return json.loads(json_util.dumps(tourney_json)), 200
 
+  return json.loads(json_util.dumps(tourney_json)), 200
 
 @app.route('/<path:path>')
 def serve(path):
   if path != "" and os.path.exists(app.static_folder + '/' + path):
-      return send_from_directory(app.static_folder, path)
+    return send_from_directory(app.static_folder, path)

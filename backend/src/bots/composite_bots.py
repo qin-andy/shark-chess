@@ -1,24 +1,26 @@
 from bots.chess_bot import ChessBot
 import chess
+import chess.engine
 
 import random
 
-
-# Water Bot
-# Waters down any two bots by giving a random ratio of moves from one to the other
-# ratio is the chance of selecting move from b1, otherwise b2 is moved
 class WaterBot(ChessBot):
+  """
+  Waters down any two bots by giving a random ratio of moves from one to the other
+  The ratio is the chance of selecting move from b1, otherwise b2 is moved
+  """
   code = 'WB'
+
   def __init__(self, b1: ChessBot, b2: ChessBot, water_ratio: float):
     super().__init__()
     self.b1 = b1
     self.b2 = b2
 
     self.settings.update({
-      # TODO : could refactor to not inlcude settings fields for simple bots.
-      'b1': b1.settings,
-      'b2': b2.settings,
-      'ratio': water_ratio
+        # TODO : could refactor to not inlcude settings fields for simple bots.
+        'b1': b1.settings,
+        'b2': b2.settings,
+        'ratio': water_ratio
     })
     self.custom_name = None
 
@@ -35,21 +37,23 @@ class WaterBot(ChessBot):
     if self.custom_name == None:
       return 'W:[' + str(self.b1) + str(self.b2) + ']R:' + str(self.settings['ratio'])
     return self.custom_name
-  
 
-  
-# After capturing, gets excited and begins lurking, before entering a frenzy
+
 class SharkFishBot(ChessBot):
+  """
+  After capturing, gets excited and begins lurking, before entering a frenzy
+  """
   code = 'SHR'
+
   def __init__(self, shallow_bot: ChessBot, lurk_time, frenzy_time,
                engine: chess.engine.SimpleEngine, limit):
     super().__init__()
     self.custom_name = None
-    self.shallow_bot = shallow_bot # todo : refactor to be settings compatible
+    self.shallow_bot = shallow_bot  # todo : refactor to be settings compatible
     self.settings.update({
-      'shallow bot': shallow_bot.code,
-      'lurk time': lurk_time,
-      'frenzy time': frenzy_time
+        'shallow bot': shallow_bot.code,
+        'lurk time': lurk_time,
+        'frenzy time': frenzy_time
     })
     self.excitement_time = 0
     self.engine = engine

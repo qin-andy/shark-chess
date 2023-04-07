@@ -4,8 +4,16 @@ from tourney.player import Player
 
 
 class GameResult:
+  """
+  Stores information for a concluded chess game.
+  """
+
   def __init__(self):
-    self.game_number = 0
+    """
+    Initalizes an empty GameResult with values to be set manually.
+    See :func:`from_chess`
+    """
+    self.game_number = 0  # TODO : is this still necessary?
     self.white_player: str = None
     self.black_player: str = None
     self.winning_player = None
@@ -21,7 +29,11 @@ class GameResult:
     self.ending_fen: str = None
 
   def from_chess(self, wp: Player, bp: Player,
-             board: chess.Board, game: chess.pgn.Game):
+                 board: chess.Board, game: chess.pgn.Game):
+    """
+    Takes information available after a game has ended and populates the relevant fields..
+    """
+
     # Basic Naming
     self.white_player = str(wp)
     self.black_player = str(bp)
@@ -32,16 +44,13 @@ class GameResult:
     game.headers['Black'] = str(bp)
 
     # TODO : configuration options for exporting comments and headers?
-    exporter = chess.pgn.StringExporter(headers=False, variations=False, comments=False)
+    exporter = chess.pgn.StringExporter(
+        headers=False, variations=False, comments=False)
     pgn_string = game.accept(exporter)
 
     # self.pgn = str(game) # pgn w/ comments, headers, etc
-    self.pgn = pgn_string # pgn w/ no extras
+    self.pgn = pgn_string  # pgn w/ no extras
     self.ending_fen = board.fen()
-
-    # TODO : For testing whiel auditting, remove later
-    self.pc_board = board
-    self.pc_game = game
 
     # Matchup id (w[id],b[id])
     self.matchup_id = str(wp.id) + ',' + str(bp.id)
@@ -49,11 +58,13 @@ class GameResult:
     # Outcome logic
     outcome = board.outcome()
     # No board outcome means turn limit was hit
+
+    # Conditional logic for determining winner/loser and r value for ELO calculation
     if outcome is None:
       self.winning_color = 'None'
       self.winning_player = 'None'
       self.end_reason = 'Turn Limit'
-      self.r = 0.5 # TODO : double check this. should elo be calculated for turn draws?
+      self.r = 0.5
 
     else:
       self.end_reason = outcome.termination.name
@@ -66,16 +77,20 @@ class GameResult:
         # Winner is either black or white bot
         if outcome.winner:
           self.winning_player = str(wp)
-          self.winning_color = 'white' # TODO : could make these bools for efficiency. 
+          self.winning_color = 'white'
           self.r = 1
         else:
           self.winning_player = str(bp)
           self.winning_color = 'black'
           self.r = 0
     return self
-  
-  # export gameresult as a dictionary
+
   def to_dict(self):
+    """
+    Exports relevant game result items as a dictionary. 
+    """
+
+    # """
     # game_data = {
     #   'Matchup ID': matchup_ids,
     #   'Winning Player': winning_players,
@@ -88,9 +103,10 @@ class GameResult:
     #   'Black': blacks,
     #   'Ending FEN': ending_fens
     # }
+    # """
 
     game_dict = {}
-    game_dict['Matchup ID']= self.matchup_id
+    game_dict['Matchup ID'] = self.matchup_id
     game_dict['Winning Player'] = self.winning_player
     game_dict['Winning Color'] = self.winning_color
     game_dict['End Reason'] = self.end_reason
@@ -98,13 +114,14 @@ class GameResult:
     game_dict['Time'] = self.time
     game_dict['PGN'] = self.pgn
     game_dict['White'] = self.white_player
-    game_dict['Black'] = self.black_player 
-    game_dict['Ending FEN'] = self.ending_fen    
+    game_dict['Black'] = self.black_player
+    game_dict['Ending FEN'] = self.ending_fen
     return game_dict
-  
-  # Update fields based on game result dictionary
+
   def from_dict(self, game_dict):
-    # gr.game_number = game_dict[''] # TODO : figure out what is and isnt being serialized
+    """
+    Updates game result fields from a dictionary created using the `to_dict` method
+    """
     self.white_player = game_dict['White']
     self.black_player = game_dict['Black']
     self.winning_player = game_dict['Winning Player']

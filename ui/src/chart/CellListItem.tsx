@@ -14,7 +14,7 @@ const CellListItem = (props: {
   const [hover, setHover] = useState(false);
   const [clicked, setClicked] = useState(false);
 
-  const onMouseEnter = () => { 
+  const onMouseEnter = () => {
     // openGameItem(index)
   }
 
@@ -24,7 +24,7 @@ const CellListItem = (props: {
   }
 
   const onMouseClick = () => {
-    let a = clicked ? openGameItem(-1) : openGameItem(index); 
+    let a = clicked ? openGameItem(-1) : openGameItem(index);
     setClicked(!clicked);
   }
 
@@ -40,16 +40,16 @@ const CellListItem = (props: {
   let style: CSSProperties = { backgroundColor: bgColor, color: textColor };
 
   return (
-    <div 
+    <div
       className='cell-list-item'
       style={style}
       onClick={onMouseClick}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      
+
       {
-        game.winningPlayer === 'None' ? 
+        game.winningPlayer === 'None' ?
           <><b>Draw</b> {game.moves} moves</>
           : <><b>{game.winningPlayer}</b> {game.moves} moves</>
       }
