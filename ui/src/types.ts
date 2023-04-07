@@ -28,7 +28,7 @@ export interface Player {
   losses: number,
   draws: number,
   thinkTime: number,
-  totalMoves: number, 
+  totalMoves: number,
   botCode: string,
   botSettings: any
 }
@@ -37,7 +37,6 @@ export interface Player {
 export interface CellData {
   x: number,
   y: number,
-  players: Player[],
   games: GameResult[],
   highlighted: boolean,
   open: boolean,

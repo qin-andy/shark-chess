@@ -8,18 +8,18 @@ import { GameResult, Player } from "../types";
 export const processGamesResponse = (data: any) => {
   let results: GameResult[] = [];
   for (let i = 0; i < data.length; i++) {
-    let gameResultData = data[i];
+    let gameResultDict = data[i];
     let gameResult: GameResult = {
-      matchupId: gameResultData['Matchup ID'],
-      winningPlayer: gameResultData['Winning Player'],
-      winningColor: gameResultData['Winning Color'],
-      endReason: gameResultData['End Reason'],
-      moves: gameResultData['Moves'],
-      time: gameResultData['Time'],
-      pgn: gameResultData['PGN'],
-      white: gameResultData['White'],
-      black: gameResultData['Black'],
-      endingFEN: gameResultData['Ending FEN'],
+      matchupId: gameResultDict['Matchup ID'],
+      winningPlayer: gameResultDict['Winning Player'],
+      winningColor: gameResultDict['Winning Color'],
+      endReason: gameResultDict['End Reason'],
+      moves: gameResultDict['Moves'],
+      time: gameResultDict['Time'],
+      pgn: gameResultDict['PGN'],
+      white: gameResultDict['White'],
+      black: gameResultDict['Black'],
+      endingFEN: gameResultDict['Ending FEN'],
     };
     results.push(gameResult);
   }
@@ -48,7 +48,7 @@ export const processPlayerResponse = (data: any) => {
 }
 
 // generates 2d array indexted by matchups
-export const aggregateMatchups = (games: GameResult[], players: Player[]) => {
+export const aggregateMatchups = (games: GameResult[], players: Player[]): GameResult[][][] => {
   // matches[white player id][black player id][game number]
   const matches: any = {};
 

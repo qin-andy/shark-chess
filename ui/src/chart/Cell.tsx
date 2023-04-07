@@ -6,13 +6,13 @@ import './Cell.css';
 const Cell = (props: {
   x: number,
   y: number,
-  players: Player[],
   games: GameResult[],
   highlighted: boolean,
   open: boolean,
   openCell: Function,
+  highlightCell: Function,
 }) => {
-  let { x, y, games, players, highlighted, open, openCell} = props;
+  let { x, y, games, highlighted, open, openCell, highlightCell } = props;
 
   const [showList, setShowList] = useState(false);
   const [hover, setHover] = useState(false);
@@ -24,6 +24,7 @@ const Cell = (props: {
 
   const handleHover = () => {
     setHover(true);
+    // highlightCell(x, y)
   }
 
   const handleUnhover = () => {
@@ -46,7 +47,7 @@ const Cell = (props: {
   let wp = games[0].white;
   let bp = games[0].black;
 
-  let [w, l, d] = summarizeMatch(games);
+  let [w, l, d] = summarizeMatchup(games);
   let [r, g, b] = generateRGB(w, l, d);
   if (open) {
     r -= 70;
@@ -54,11 +55,13 @@ const Cell = (props: {
     b -= 70;
   }
 
+  // highlighting logic
   if (hover) {
-    r -= 30;
-    g -= 30;
-    b -= 30;
+    r -= 20;
+    g -= 20;
+    b -= 20;
   }
+
 
   let new_style: CSSProperties = {
     backgroundColor: `rgb(${r},${g},${b})`
@@ -66,8 +69,8 @@ const Cell = (props: {
 
   return (
     <>
-      <div 
-        className='cell'
+      <div
+        className={'cell ' + (highlighted ? 'cell-highlighted' : '')}
         style={new_style}
       >
         {open ? <CellList wp={wp} bp={bp} games={games} /> : null}
@@ -76,7 +79,7 @@ const Cell = (props: {
           onMouseEnter={handleHover}
           onMouseLeave={handleUnhover}
         >
-          <p/>
+          <p />
           <p style={playerDisplayStyle}>{wp}</p>
           <p style={playerDisplayStyle}>{bp}</p>
           <p>{w}/{l}/{d}</p>
@@ -93,20 +96,20 @@ const generateRGB = (w: number, l: number, d: number) => {
 
   let total = w + l + d;
   // Max ratio, set in order to make colors more pastel
-  let max = 190; 
+  let max = 190;
 
   let w_ratio = w / total;
   let l_ratio = l / total; // L + ratio + you fell off + didn't ask
   let d_ratio = d / total;
 
   r = l_ratio * max + 64; // LOSSES
-  g = d_ratio * (max/2) + 127;  // DRAWS weighted less, seeing wins/losses is bigger
+  g = d_ratio * (max / 2) + 127;  // DRAWS weighted less, seeing wins/losses is bigger
   b = w_ratio * max + 127; // WINS
 
   return [r, g, b];
 }
 
-const summarizeMatch = (results: GameResult[]) => {
+const summarizeMatchup = (results: GameResult[]) => {
   let wins = 0;
   let losses = 0;
   let draws = 0;

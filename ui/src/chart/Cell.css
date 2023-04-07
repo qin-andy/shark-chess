@@ -1,5 +1,6 @@
+
 .cell {
-  border: 2px solid;
+  border: 3px solid;
   border-radius: 15px;
   position: relative;
   padding: 0px;
@@ -8,10 +9,15 @@
   font-size: 13px;
   text-align: center;
   
-  height: 90px;
-  width: 90px;
+  height: 100px;
+  width: 100px;
 
   cursor: pointer;
+}
+
+.cell-highlighted {
+  /* transform: scale(1.5); */
+  border-radius: 50px;
 }
 
 
