@@ -283,8 +283,8 @@ class Tourney:
     players = []
     for player_dict in p_jdata:
       name = player_dict['Name']
-      bot = self.bot_manager.get_bot(player_dict['Bot Code'], player_dict['Bot Settings'])
-      player = Player(bot, name)
+      bot = self.bot_manager.get_bot(player_dict['Bot Settings'])
+      player = Player(name, bot)
       player.from_dict(player_dict)
       players.append(player)
 
@@ -310,8 +310,8 @@ class Tourney:
     players = []
     for player_dict in p_data:
       name = player_dict['Name']
-      bot = self.bot_manager.get_bot(player_dict['Bot Code'], player_dict['Bot Settings'])
-      player = Player(bot, name)
+      bot = self.bot_manager.get_bot(player_dict['Bot Settings'])
+      player = Player(name, bot)
       player.from_dict(player_dict)
       players.append(player)
     self.players = players

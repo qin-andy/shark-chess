@@ -24,10 +24,20 @@ UI_PATH = '../ui/public/results/continuer/'
   
 # 1. Run tourney and export to json
 def dao_cont_1(dao: RecordsDao, bm: BotManager):
-  player_ar = Player(bm.get_bot('AR'), "Random")
-  player_sk = Player(bm.get_bot('SK'), "Suicide King")
-  player_pc = Player(bm.get_bot('PC'), "Pacifist")
-  players_2 = [player_sk, player_ar]
+  player_ar = Player("Random", bm.get_simple_bot('AR'), )
+  player_sk = Player("Suicide King", bm.get_simple_bot('SK'), )
+  player_pc = Player("Pacifist", bm.get_simple_bot('PC'),)
+
+  # Nested composite
+  bot_sf_dk = WaterBot(bm.get_simple_bot('SF'), bm.get_simple_bot('DK'), 0.2)
+  bot_sf_brk = WaterBot(bm.get_simple_bot('SF'), bm.get_simple_bot('BRK'), 0.2)
+  bot_sf_dc_sk_brk = WaterBot(bot_sf_brk, bot_sf_dk, 0.5)
+
+  player_sf_lotto = Player("Lotto", bot_sf_dc_sk_brk)
+
+  # Simple composite
+  player_part_sk = Player("Part SK", WaterBot(bm.get_simple_bot('SF'), bm.get_simple_bot('SK'), 0.2))
+  players_2 = [player_sk, player_ar, player_part_sk, player_sf_lotto]
 
   tourney = Tourney(TOURNEY_NAME, MATCH_LENGTH, bm)
   tourney.play_tournament(players_2)
@@ -43,7 +53,7 @@ def dao_cont_2(dao: RecordsDao, bm: BotManager):
 # 3. Get tourney frommongodb, reconstruct tourney, continue tourney, export as json, put back into mongodb
 def dao_cont_3(dao: RecordsDao, bm: BotManager):
   dao_tourney = dao.get_tourney(TOURNEY_NAME)  
-  new_player_brk = Player(bm.get_bot('BRK'), "Berserk")
+  new_player_brk = Player('Berserk', bm.get_simple_bot('BRK'))
 
   dao_tourney.continue_tourney(new_player_brk)
 
@@ -62,34 +72,13 @@ def quiet_continue_stanard_test(bm: BotManager):
   print(list(bm.simple_bots_map.keys()))
   print(bm.composite_bot_codes)
 
-  player_ar = Player(bm.get_bot('AR'), "Random")
-  player_sk = Player(bm.get_bot('SK'), "Suicide King")
-  player_pc = Player(bm.get_bot('PC'), "Pacifist")
-  player_brk = Player(bm.get_bot('BRK'), "Berserk")
-  player_pf = Player(bm.get_bot('PF'), "Panicfish")
-  player_dk = Player(bm.get_bot('DK'), 'Dance King')
-  player_sf = Player(bm.get_bot('SF'), 'Stockfish100')
-
-  bot_sf_5 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.05)
-  bot_sf_10 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.1)
-  bot_sf_30 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.3)
-  bot_sf_50 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.5)
-  bot_sf_70 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.7)
-  bot_sf_75 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.75)
-  bot_sf_80 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.78)
-  bot_sf_90 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.9)
-  bot_sf_95 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.95)
-
-
-  player_sf_5 = Player(bot_sf_5, "Stockfish 5")
-  player_sf_10 = Player(bot_sf_10, "Stockfish 10")
-  player_sf_30 = Player(bot_sf_30, "Stockfish 30")
-  player_sf_50 = Player(bot_sf_50, "Stockfish 50")
-  player_sf_70 = Player(bot_sf_70, "Stockfish 70")
-  player_sf_75 = Player(bot_sf_75, "Stockfish 75")
-  player_sf_80 = Player(bot_sf_80, "Stockfish 80")
-  player_sf_90 = Player(bot_sf_90, "Stockfish 90")
-  player_sf_95 = Player(bot_sf_95, "Stockfish 95")
+  player_ar = Player('Random', bm.get_bot('AR'))
+  player_sk = Player('Suicide King', bm.get_bot('SK'))
+  player_pc = Player('Pacifist', bm.get_bot('PC'))
+  player_brk = Player('Berserk', bm.get_bot('BRK'))
+  player_pf = Player('Panicfish', bm.get_bot('PF'))
+  player_dk = Player('Danceking',bm.get_bot('DK'))
+  player_sf = Player('Stockfish', bm.get_bot('SF'))
 
   lineup_standard = [
     player_ar,
@@ -97,33 +86,22 @@ def quiet_continue_stanard_test(bm: BotManager):
     player_brk,
     player_sk,
     player_dk,
-
-    # player_sf_5,
-    # player_sf_10, 
-    # player_sf_30, 
-    # player_sf_50, 
-    # player_sf_70, 
-    # player_sf_75, 
-    # player_sf_80,
-    # player_sf_90, 
-    # player_sf_95, 
-    # player_sf
   ]
 
   # quiet players not hving explicit games played
 
   # experiment players:
-  bot_sf_sk = WaterBot(bm.get_bot('SF'), bm.get_bot('SK'), 0.7)
-  bot_sf_dk = WaterBot(bm.get_bot('SF'), bm.get_bot('DK'), 0.7)
-  bot_sf_brk = WaterBot(bm.get_bot('SF'), bm.get_bot('BRK'), 0.7)
+  bot_sf_sk = WaterBot(bm.get_simple_bot('SF'), bm.get_simple_bot('SK'), 0.2)
+  bot_sf_dk = WaterBot(bm.get_simple_bot('SF'), bm.get_simple_bot('DK'), 0.2)
+  bot_sf_brk = WaterBot(bm.get_simple_bot('SF'), bm.get_simple_bot('BRK'), 0.2)
   bot_sf_dc_sk_brk = WaterBot(bot_sf_brk, bot_sf_dk, 0.5)
 
-  player_sf_sk = Player(bot_sf_sk, "SF SK 50")
-  player_sf_dk = Player(bot_sf_dk, "SF DK 50")
-  player_sf_brk = Player(bot_sf_brk, "SF BRK 50")
-  player_sf_lotto = Player(bot_sf_dc_sk_brk, "Lotto")
+  player_sf_sk = Player("Quarter Suicide", bot_sf_sk)
+  player_sf_dk = Player("Quarter Dance", bot_sf_dk)
+  player_sf_brk = Player("Quarter Berserk", bot_sf_brk)
+  player_sf_lotto = Player("Lotto", bot_sf_dc_sk_brk)
 
-  player_sns = Player(bm.get_bot('SNS'), 'Sensitive')
+  player_sns = Player(bm.get_simple_bot('SNS'), 'Sensitive')
 
   lineup_performing = [
     # player_sf_sk,
@@ -151,39 +129,22 @@ def bot_manager_export_test(bm: BotManager):
   print(bm.composite_bot_codes)
 
   # Testing get simple bots
-  bm.get_bot('AR')
-  player_ar = Player(bm.get_bot('AR'), "Random")
-  player_sk = Player(bm.get_bot('SK'), "Suicide King")
-  player_pacifist = Player(bm.get_bot('PC'), "Pacifist")
-  player_berserk = Player(bm.get_bot('BRK'), "Berserk")
-  player_panic = Player(bm.get_bot('PF'), "Panicfish")
-  player_sf = Player(bm.get_bot('SF'), 'Stockfish100')
-
-  # simple bots playerlist
-  players_simple = [player_sf, player_ar, player_pacifist]
+  bm.get_simple_bot('AR')
 
   # constructing composite bots manually
-  bot_sf_5 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.05)
-  bot_sf_10 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.1)
-  bot_shark_0_3 = SharkFishBot(bm.get_bot('AR'), 0, 3, bm.engine, bm.base_limit)
 
-  bot_sf_sk = WaterBot(bm.get_bot('SF'), bm.get_bot('SK'), 0.5)
-  bot_sf_dk = WaterBot(bm.get_bot('SF'), bm.get_bot('DK'), 0.5)
-  bot_sf_brk = WaterBot(bm.get_bot('SF'), bm.get_bot('BRK'), 0.5)
+  bot_sf_sk = WaterBot(bm.get_simple_bot('SF'), bm.get_simple_bot('SK'), 0.5)
+  bot_sf_dk = WaterBot(bm.get_simple_bot('SF'), bm.get_simple_bot('DK'), 0.5)
+  bot_sf_brk = WaterBot(bm.get_simple_bot('SF'), bm.get_simple_bot('BRK'), 0.5)
 
   bot_sf_dc_sk_brk = WaterBot(bot_sf_brk, bot_sf_dk, 0.5)
 
-  player_sf_5 = Player(bot_sf_5, "Stockfish 5")
-  player_sf_10 = Player(bot_sf_10, "Stockfish 10")
-  player_shark = Player(bot_shark_0_3, "Shark 0-3")
 
-  player_sf_sk = Player(bot_sf_sk, "SF SK 50")
-  player_sf_dk = Player(bot_sf_dk, "SF DK 50")
-  player_sf_brk = Player(bot_sf_brk, "SF BRK 50")
-  player_sf_lotto = Player(bot_sf_dc_sk_brk, "Lotto")
-  
+  player_sf_sk = Player("Quarter Suicide", bot_sf_sk)
+  player_sf_dk = Player("Quarter Dance", bot_sf_dk)
+  player_sf_brk = Player("Quarter Berserk", bot_sf_brk)
+  player_sf_lotto = Player("Lotto", bot_sf_dc_sk_brk)
 
-  players_composite_basic = [player_sf_5, player_sf_10, player_shark]
   players_composite_nested = [player_sf_sk, player_sf_dk, player_sf_brk, player_sf_lotto]
 
   # quiet players not hving explicit games played
@@ -204,34 +165,14 @@ def run_tourney_store_db(dao: RecordsDao, bm: BotManager):
   print(list(bm.simple_bots_map.keys()))
   print(bm.composite_bot_codes)
 
-  player_ar = Player(bm.get_bot('AR'), "Random")
-  player_sk = Player(bm.get_bot('SK'), "Suicide King")
-  player_pc = Player(bm.get_bot('PC'), "Pacifist")
-  player_brk = Player(bm.get_bot('BRK'), "Berserk")
-  player_pf = Player(bm.get_bot('PF'), "Panicfish")
-  player_dk = Player(bm.get_bot('DK'), 'Dance King')
-  player_sf = Player(bm.get_bot('SF'), 'Stockfish100')
+  player_ar = Player('Random', bm.get_bot('AR'))
+  player_sk = Player('Suicide King', bm.get_bot('SK'))
+  player_pc = Player('Pacifist', bm.get_bot('PC'))
+  player_brk = Player('Berserk', bm.get_bot('BRK'))
+  player_pf = Player('Panicfish', bm.get_bot('PF'))
+  player_dk = Player('Danceking',bm.get_bot('DK'))
+  player_sf = Player('Stockfish', bm.get_bot('SF'))
 
-  bot_sf_5 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.05)
-  bot_sf_10 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.1)
-  bot_sf_30 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.3)
-  bot_sf_50 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.5)
-  bot_sf_70 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.7)
-  bot_sf_75 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.75)
-  bot_sf_80 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.78)
-  bot_sf_90 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.9)
-  bot_sf_95 = WaterBot(bm.get_bot('SF'), bm.get_bot('AR'), 0.95)
-
-
-  player_sf_5 = Player(bot_sf_5, "Stockfish 5")
-  player_sf_10 = Player(bot_sf_10, "Stockfish 10")
-  player_sf_30 = Player(bot_sf_30, "Stockfish 30")
-  player_sf_50 = Player(bot_sf_50, "Stockfish 50")
-  player_sf_70 = Player(bot_sf_70, "Stockfish 70")
-  player_sf_75 = Player(bot_sf_75, "Stockfish 75")
-  player_sf_80 = Player(bot_sf_80, "Stockfish 80")
-  player_sf_90 = Player(bot_sf_90, "Stockfish 90")
-  player_sf_95 = Player(bot_sf_95, "Stockfish 95")
 
   lineup_standard = [
     # player_ar,
@@ -255,17 +196,15 @@ def run_tourney_store_db(dao: RecordsDao, bm: BotManager):
   # quiet players not hving explicit games played
 
   # experiment players:
-  bot_sf_sk = WaterBot(bm.get_bot('SF'), bm.get_bot('SK'), 0.25)
-  bot_sf_dk = WaterBot(bm.get_bot('SF'), bm.get_bot('DK'), 0.25)
-  bot_sf_brk = WaterBot(bm.get_bot('SF'), bm.get_bot('BRK'), 0.25)
+  bot_sf_sk = WaterBot(bm.get_simple_bot('SF'), bm.get_simple_bot('SK'), 0.25)
+  bot_sf_dk = WaterBot(bm.get_simple_bot('SF'), bm.get_simple_bot('DK'), 0.25)
+  bot_sf_brk = WaterBot(bm.get_simple_bot('SF'), bm.get_simple_bot('BRK'), 0.25)
   bot_sf_dc_sk_brk = WaterBot(bot_sf_brk, bot_sf_dk, 0.5)
 
-  player_sf_sk = Player(bot_sf_sk, "Quarter Suicide")
-  player_sf_dk = Player(bot_sf_dk, "Quarter Dance")
-  player_sf_brk = Player(bot_sf_brk, "Quarter Berserk")
-  player_sf_lotto = Player(bot_sf_dc_sk_brk, "Lotto")
-
-  player_sns = Player(bm.get_bot('SNS'), 'Sensitive')
+  player_sf_sk = Player("Quarter Suicide", bot_sf_sk)
+  player_sf_dk = Player("Quarter Dance", bot_sf_dk)
+  player_sf_brk = Player("Quarter Berserk", bot_sf_brk)
+  player_sf_lotto = Player("Lotto", bot_sf_dc_sk_brk)
 
   lineup_performing = [
     player_sf_sk,
@@ -287,12 +226,12 @@ if __name__ == '__main__':
   bm = BotManager()
   dao = RecordsDao(bm)
 
-  # dao_cont_1(dao, bm)
-  # dao_cont_2(dao, bm)
-  # dao_cont_3(dao, bm)
+  dao_cont_1(dao, bm)
+  dao_cont_2(dao, bm)
+  dao_cont_3(dao, bm)
   # dao_cont_cleanup(dao)
 
-  run_tourney_store_db(dao, bm)
+  # run_tourney_store_db(dao, bm)
   # bot_manager_export_test(bm)
   # quiet_continue_stanard_test(bm)
 

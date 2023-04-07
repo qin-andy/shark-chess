@@ -14,14 +14,12 @@ class WaterBot(ChessBot):
     self.b1 = b1
     self.b2 = b2
 
-    self.settings = {
-      'b1': b1.code,
-      'b2': b2.code,
+    self.settings.update({
       # TODO : could refactor to not inlcude settings fields for simple bots.
-      'b1 settings': b1.settings,
-      'b2 settings': b2.settings,
+      'b1': b1.settings,
+      'b2': b2.settings,
       'ratio': water_ratio
-    }
+    })
     self.custom_name = None
 
   def make_move(self, board):
@@ -47,12 +45,12 @@ class SharkFishBot(ChessBot):
                engine: chess.engine.SimpleEngine, limit):
     super().__init__()
     self.custom_name = None
-    self.shallow_bot = shallow_bot
-    self.settings = {
+    self.shallow_bot = shallow_bot # todo : refactor to be settings compatible
+    self.settings.update({
       'shallow bot': shallow_bot.code,
       'lurk time': lurk_time,
       'frenzy time': frenzy_time
-    }
+    })
     self.excitement_time = 0
     self.engine = engine
     self.limit = limit

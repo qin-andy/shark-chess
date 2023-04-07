@@ -9,7 +9,7 @@ class ChessBot:
     # Bot code has two uses:
       # Used in exporting tourneys to record a player's bot type
       # Used on BotManager level to construct bots
-    self.settings = {}
+    self.settings = { 'Code': self.code }
 
   def make_move(self, board: chess.Board) -> typing.Tuple[chess.Move, str]:
     pass

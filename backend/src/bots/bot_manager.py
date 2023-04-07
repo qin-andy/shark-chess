@@ -70,10 +70,12 @@ class BotManager:
   # Composite bot codes: requires settings. constructs a new bot according to settings
     # Will call itself recuyrsively for composite bots.
     # Depth: used to limit recursive calls  
-  def get_bot(self, code: str, settings: dict=None, depth: int=0):
+  def get_bot(self, settings: dict, depth: int=0):
     if depth >= 6: 
       raise Exception('Max composite bot depth reacched!')
     
+    code = settings['Code']
+
     if code in self.simple_bots_map.keys():
       return self.simple_bots_map[code]
     if code in self.composite_bot_codes:
@@ -83,5 +85,12 @@ class BotManager:
       if code == 'WB':
         print('smubbis')
         # TODO : casework for loading WB
+        b1 = self.get_bot(settings['b1'])
+        b2 = self.get_bot(settings['b2'])
+        return WaterBot(b1, b2, settings['ratio'])
         
     raise Exception('Code not in bot manager: ' + str(code))
+  
+  # shorthand for simple bots by code
+  def get_simple_bot(self, code: str):
+    return self.get_bot({'Code': code})

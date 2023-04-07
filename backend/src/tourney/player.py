@@ -4,7 +4,7 @@ import time
 
 
 class Player:
-  def __init__(self, bot: ChessBot, friendly_name):
+  def __init__(self, friendly_name, bot: ChessBot):
     self.id: int = None # Assigned at tourney level (At start tourney)
     self.friendly_name: str = friendly_name
     self.bot: ChessBot = bot
@@ -47,7 +47,6 @@ class Player:
     player_dict['Think Time'] = self.total_thinking_time
     player_dict['Moves'] = self.total_moves
 
-    player_dict['Bot Code'] = self.bot.code
     player_dict['Bot Settings'] = self.bot.settings
     
     return player_dict
@@ -62,6 +61,7 @@ class Player:
     self.draws = int(player_dict['Draws'])
     self.total_thinking_time = float(player_dict['Think Time'])
     self.total_moves = int(player_dict['Moves'])
+
     return self
 
   def __str__(self):

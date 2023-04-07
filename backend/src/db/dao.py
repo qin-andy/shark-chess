@@ -90,8 +90,8 @@ class RecordsDao:
     new_players: list[Player] = []
     for player in players:
       player_name = player['Name']
-      bot = self.bot_manager.get_bot(player['Bot Code'], player['Bot Settings'])
-      new_player = Player(bot, player_name)
+      bot = self.bot_manager.get_bot(player['Bot Settings'])
+      new_player = Player(player_name, bot)
       new_player.from_dict(player)
       new_players.append(new_player)
     tourney.add_players_quiet(new_players)
