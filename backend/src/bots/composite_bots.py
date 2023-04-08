@@ -1,3 +1,4 @@
+from typing import TypedDict
 from bots.chess_bot import ChessBot
 import chess
 import chess.engine
@@ -86,3 +87,40 @@ class SharkFishBot(ChessBot):
     if self.custom_name == None:
       return 'Shark[' + str(self.shallow_bot) + ']R:' + str(self.limit)
     return self.custom_name
+
+
+
+class BerserkModularBot(ChessBot):
+  """
+  Modular version of the Berserk bot. 
+  Always does moves which check. Then captures, then modular after.
+  """
+  code = 'BRK (M)'
+
+  def __init__(self, b1: ChessBot):
+    super().__init__()
+    self.settings.update({'b1': b1.settings})
+    self.b1 = b1
+
+  def make_move(self, board):
+    checks_arr = [move for move in board.generate_legal_moves()
+                  if board.gives_check(move)]
+
+    if checks_arr:
+      # Prioritizes checkmates (in 1)
+      for check in checks_arr:
+        new_board = board.copy()
+        new_board.push(check)
+        if new_board.is_checkmate():
+          return check, 'Checkmate'
+      return random.choice(checks_arr), 'Check'
+    
+    captures_arr = [move for move in board.generate_legal_moves()
+                if board.is_capture(move)]
+    if captures_arr:
+      return random.choice(captures_arr), 'Capture'
+    
+    return self.b1.make_move(board)
+
+  def __str__(self):
+    return "Berserk (M)"

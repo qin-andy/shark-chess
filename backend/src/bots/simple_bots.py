@@ -64,15 +64,17 @@ class BerserkBot(ChessBot):
   def make_move(self, board):
     checks_arr = [move for move in board.generate_legal_moves()
                   if board.gives_check(move)]
-    captures_arr = [move for move in board.generate_legal_moves()
-                    if board.is_capture(move)]
-    moves_arr = [move for move in board.generate_legal_moves()]
+
     if checks_arr:
       return random.choice(checks_arr), 'Check'
-    elif captures_arr:
+    
+    captures_arr = [move for move in board.generate_legal_moves()
+                if board.is_capture(move)]
+    if captures_arr:
       return random.choice(captures_arr), 'Capture'
-    else:
-      return random.choice(moves_arr), ''
+    
+    moves_arr = [move for move in board.generate_legal_moves()]
+    return random.choice(moves_arr), ''
 
   def __str__(self):
     return "Berserk"
@@ -186,11 +188,19 @@ class SensitiveFish(ChessBot):
 
   def make_move(self, board: chess.Board):
     # this includes own captures.
-    if (board.is_check()) or (board.halfmove_clock == 0):
+    if (board.is_check()):
       return move_rand(board), "!?"
-    else:
-      result = self.engine.play(board, self.limit)
-      return result.move, ''
+    
+    # Check last move
+    if len(board.move_stack) > 0:
+      last_move = board.pop()
+      is_last_move_capture = board.is_capture(last_move)
+      board.push(last_move)
+
+      if (is_last_move_capture):
+        return move_rand(board), "!??"
+    result = self.engine.play(board, self.limit)
+    return result.move, ''
 
   def __str__(self):
     return "SensitiveFish"

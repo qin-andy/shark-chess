@@ -15,9 +15,10 @@ class BotManager:
     2. Tourney continuation: lookup table for simple bots
     3. Tourney continuation: creates composite bots per bot settings.
   """
-  base_limit = chess.engine.Limit(time=0.1, depth=10)
-  
 
+  # Engine limit. Bot is neutered. By a lot.
+  base_limit = chess.engine.Limit(time=0.001, depth=10)
+  
   def __init__(self):
     """
     Two categories of bots.
@@ -66,7 +67,8 @@ class BotManager:
 
     composite_bot_codes: List[str] = [
         WaterBot.code,
-        SharkFishBot.code
+        SharkFishBot.code,
+        BerserkModularBot.code,
     ]
 
     self.composite_bot_codes = composite_bot_codes
@@ -91,13 +93,18 @@ class BotManager:
     if code in self.composite_bot_codes:
       if settings == None:
         raise Exception('Missing settings for bot ' + code)
+      
       # Casework
-      if code == 'WB':
+      if code == WaterBot.code:
         print('smubbis')
         # TODO : casework for loading WB
         b1 = self.get_bot(settings['b1'])
         b2 = self.get_bot(settings['b2'])
         return WaterBot(b1, b2, settings['ratio'])
+      elif code == BerserkModularBot.code:
+        print ('constructing modular beserserk')
+        b1 = self.get_bot(settings['b1'])
+        return BerserkModularBot(b1)
 
     raise Exception('Code not in bot manager: ' + str(code))
 

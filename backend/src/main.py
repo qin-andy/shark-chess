@@ -27,6 +27,8 @@ def dao_cont_1(dao: RecordsDao, bm: BotManager):
   player_ar = Player("Random", bm.get_simple_bot('AR'), )
   player_sk = Player("Suicide King", bm.get_simple_bot('SK'), )
   player_pc = Player("Pacifist", bm.get_simple_bot('PC'),)
+  player_brk_m = Player('Berserk SF', BerserkModularBot(bm.get_simple_bot('SF')))
+
 
   # Nested composite
   bot_sf_dk = WaterBot(bm.get_simple_bot('SF'), bm.get_simple_bot('DK'), 0.2)
@@ -38,7 +40,7 @@ def dao_cont_1(dao: RecordsDao, bm: BotManager):
   # Simple composite
   player_part_sk = Player("Part SK", WaterBot(
       bm.get_simple_bot('SF'), bm.get_simple_bot('SK'), 0.2))
-  players_2 = [player_sk, player_ar, player_part_sk, player_sf_lotto]
+  players_2 = [player_sk, player_ar, player_brk_m]
 
   tourney = Tourney(TOURNEY_NAME, MATCH_LENGTH, bm)
   tourney.play_tournament(players_2)
@@ -161,6 +163,7 @@ def bot_manager_export_test(bm: BotManager):
   tourney.export_games_json(ui_path_manager + '/' + 'export')
   tourney.export_players_json(ui_path_manager + '/' + 'export')
 
+
 def run_tourney_store_db(dao: RecordsDao, bm: BotManager):
   # List all codes
   print(list(bm.simple_bots_map.keys()))
@@ -175,35 +178,40 @@ def run_tourney_store_db(dao: RecordsDao, bm: BotManager):
   player_sf = Player('Stockfish', bm.get_simple_bot('SF'))
   player_sns = Player('Sensitive', bm.get_simple_bot('SNS'))
 
-  lineup_standard = [
-
-  ]
-
-  # quiet players not hving explicit games played
 
   # experiment players:
-  bot_sf_sk = WaterBot(bm.get_simple_bot('SF'), bm.get_simple_bot('SK'), 0.25)
   bot_sf_dk = WaterBot(bm.get_simple_bot('SF'), bm.get_simple_bot('DK'), 0.25)
   bot_sf_brk = WaterBot(bm.get_simple_bot(
       'SF'), bm.get_simple_bot('BRK'), 0.25)
   bot_sf_dc_sk_brk = WaterBot(bot_sf_brk, bot_sf_dk, 0.5)
 
-  player_sf_sk = Player("Quarter Suicide", bot_sf_sk)
-  player_sf_dk = Player("Quarter Dance", bot_sf_dk)
-  player_sf_brk = Player("Quarter Berserk", bot_sf_brk)
   player_sf_lotto = Player("Lotto", bot_sf_dc_sk_brk)
 
+  player_brk_m = Player('Berserk SF', BerserkModularBot(bm.get_simple_bot('SF')))
+
+  # quiet players not hving explicit games played
+  lineup_quiet = [
+      # player_ar,
+      # player_sk,
+      # player_pc,
+      # player_sf_lotto,
+      # player_brk,
+  ]
+
   lineup_performing = [
+      player_ar,
       player_sk,
       player_pc,
-      player_sf_lotto,
-      player_brk,
       player_sns,
+      player_brk_m,
+      player_sf
   ]
 
   # standard lineup is added quietly
-  tourney = Tourney('manager', 10, bm)
-  # tourney.add_players_quiet(lineup_standard)
+  
+  NAME = 'bot_experiment'
+  tourney = Tourney(NAME, 10, bm)
+  tourney.add_players_quiet(lineup_quiet)
 
   tourney.continue_tourney_multi(lineup_performing)
   dao.store_tourney(tourney)
