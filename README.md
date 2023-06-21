@@ -11,6 +11,9 @@ An fullstack automatic chess tournament simulator and visualizer written in Pyth
 
  Inspired by [an incredible series of papers written by Tom Murphy for SIGBOVIK.](http://tom7.org/chess/).
 
+ Check out some excample games on this Lichess study:
+ https://lichess.org/study/PadCquFg
+
 ## Setting up Local Development
 If developing on Windows, run all commands through WSL
 ### Setting up MongoDB
